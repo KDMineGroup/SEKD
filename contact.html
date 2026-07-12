@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — SESMine</title>
+  <meta name="description" content="Get in touch with the SESMine team. Sales, support, partnerships and general enquiries." />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary);margin:0;}
+    .public-nav{position:sticky;top:0;z-index:200;background:rgba(15,17,23,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--color-border);padding:0 40px;display:flex;align-items:center;height:60px;gap:32px;}
+    .public-nav__logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+    .public-nav__logo img{height:26px;}
+    .public-nav__logo-text{font-size:1rem;font-weight:800;color:var(--color-text-primary);letter-spacing:-0.03em;}
+    .public-nav__links{display:flex;gap:4px;flex:1;}
+    .public-nav__links a{padding:6px 14px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;border-radius:var(--radius-md);transition:background .15s,color .15s;}
+    .public-nav__links a:hover{background:var(--color-bg-hover);color:var(--color-text-primary);}
+    .public-nav__links a.active{color:var(--color-accent);font-weight:600;}
+    .public-nav__actions{display:flex;gap:8px;flex-shrink:0;}
+    .btn-nav-login{padding:7px 16px;background:none;border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-secondary);font-size:0.875rem;font-weight:500;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:all .15s;}
+    .btn-nav-login:hover{border-color:var(--color-accent);color:var(--color-accent);}
+    .btn-nav-cta{padding:7px 16px;background:var(--color-accent);border:none;border-radius:var(--radius-md);color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:background .2s;}
+    .btn-nav-cta:hover{background:var(--color-accent-dark);}
+
+    .page-hero{padding:72px 40px 48px;text-align:center;max-width:640px;margin:0 auto;}
+    .page-hero__eyebrow{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-accent);margin-bottom:16px;}
+    .page-hero__title{font-size:2.5rem;font-weight:900;letter-spacing:-0.04em;line-height:1.1;margin:0 0 16px;}
+    .page-hero__desc{font-size:1rem;color:var(--color-text-secondary);line-height:1.6;margin:0;}
+
+    .contact-layout{max-width:1100px;margin:0 auto;padding:0 40px 80px;display:grid;grid-template-columns:1fr 420px;gap:40px;align-items:start;}
+    @media(max-width:900px){.contact-layout{grid-template-columns:1fr;}}
+
+    /* ── Contact form ── */
+    .contact-form-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:32px;animation:fadeInUp 0.4s ease both;}
+    .contact-form-card h2{font-size:1.1rem;font-weight:700;margin:0 0 24px;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--color-text-secondary);margin-bottom:6px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;background:var(--color-bg-input);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-primary);font-size:0.875rem;font-family:var(--font-body);transition:border-color .2s,box-shadow .2s;box-sizing:border-box;resize:vertical;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(245,166,35,0.15);}
+    .form-group input::placeholder,.form-group textarea::placeholder{color:var(--color-text-muted);}
+    .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media(max-width:500px){.form-row-2{grid-template-columns:1fr;}}
+    .btn-submit{width:100%;padding:12px;background:var(--color-accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:0.95rem;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-submit:hover{background:var(--color-accent-dark);box-shadow:0 4px 16px rgba(245,166,35,0.3);}
+    .btn-submit:disabled{opacity:0.6;cursor:not-allowed;}
+    .form-success{display:none;text-align:center;padding:32px 20px;}
+    .form-success.visible{display:block;animation:fadeInUp 0.4s ease both;}
+    .form-success__icon{width:56px;height:56px;background:rgba(46,204,113,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+    .form-success__title{font-size:1.1rem;font-weight:700;margin:0 0 8px;}
+    .form-success__desc{font-size:0.875rem;color:var(--color-text-secondary);}
+
+    /* ── Sidebar info ── */
+    .contact-sidebar{display:flex;flex-direction:column;gap:20px;animation:fadeInUp 0.4s ease both;animation-delay:0.1s;}
+    .contact-info-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:24px;}
+    .contact-info-card h3{font-size:0.9rem;font-weight:700;margin:0 0 16px;}
+    .contact-method{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;}
+    .contact-method:last-child{margin-bottom:0;}
+    .contact-method__icon{width:36px;height:36px;background:rgba(245,166,35,0.1);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .contact-method__label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-muted);margin-bottom:3px;}
+    .contact-method__value{font-size:0.875rem;font-weight:600;color:var(--color-text-primary);}
+    .contact-method__note{font-size:0.72rem;color:var(--color-text-muted);margin-top:2px;}
+
+    /* ── Team cards ── */
+    .team-grid{display:flex;flex-direction:column;gap:12px;}
+    .team-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg-deep);border-radius:var(--radius-md);border:1px solid var(--color-border);}
+    .team-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:800;color:#fff;flex-shrink:0;}
+    .team-name{font-size:0.875rem;font-weight:600;color:var(--color-text-primary);}
+    .team-role{font-size:0.72rem;color:var(--color-text-muted);}
+
+    /* ── Office hours ── */
+    .hours-grid{display:flex;flex-direction:column;gap:8px;}
+    .hours-row{display:flex;justify-content:space-between;font-size:0.82rem;}
+    .hours-row__day{color:var(--color-text-secondary);}
+    .hours-row__time{font-weight:600;color:var(--color-text-primary);}
+    .hours-row__time.closed{color:var(--color-text-muted);}
+
+    .public-footer{border-top:1px solid var(--color-border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+    .public-footer__copy{font-size:0.78rem;color:var(--color-text-muted);}
+    .public-footer__links{display:flex;gap:20px;}
+    .public-footer__links a{font-size:0.78rem;color:var(--color-text-muted);text-decoration:none;transition:color .15s;}
+    .public-footer__links a:hover{color:var(--color-text-primary);}
+  </style>
+</head>
+<body>
+
+  <nav class="public-nav" role="navigation" aria-label="Main navigation">
+    <a href="/index.html" class="public-nav__logo"><img src="/assets/img/logo.svg" alt="SESMine"/><span class="public-nav__logo-text">SESMine</span></a>
+    <div class="public-nav__links">
+      <a href="/index.html">Home</a>
+      <a href="/hub-preview.html">Hubs</a>
+      <a href="/products/ai-predictor.html">Products</a>
+      <a href="/resources.html">Resources</a>
+      <a href="/news.html">News</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html" class="active" aria-current="page">Contact</a>
+    </div>
+    <div class="public-nav__actions">
+      <a href="/auth/login.html" class="btn-nav-login">Sign In</a>
+      <a href="/auth/register.html" class="btn-nav-cta">Get Started</a>
+    </div>
+  </nav>
+
+  <section class="page-hero" aria-labelledby="contact-title">
+    <p class="page-hero__eyebrow">Get In Touch</p>
+    <h1 class="page-hero__title" id="contact-title">We'd Love to Hear From You</h1>
+    <p class="page-hero__desc">Sales enquiries, technical support, partnerships or just a question — our team typically responds within one business day.</p>
+  </section>
+
+  <main class="contact-layout" role="main">
+
+    <!-- Contact form -->
+    <div class="contact-form-card">
+      <h2>Send Us a Message</h2>
+      <div id="contactFormWrap">
+        <form id="contactForm" onsubmit="submitContact(event)" novalidate>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cf_firstName">First Name *</label>
+              <input type="text" id="cf_firstName" placeholder="James" required autocomplete="given-name" />
+            </div>
+            <div class="form-group">
+              <label for="cf_lastName">Last Name *</label>
+              <input type="text" id="cf_lastName" placeholder="Wilson" required autocomplete="family-name" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cf_email">Work Email *</label>
+            <input type="email" id="cf_email" placeholder="james@company.com" required autocomplete="email" />
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cf_company">Company</label>
+              <input type="text" id="cf_company" placeholder="BHP, Rio Tinto…" autocomplete="organization" />
+            </div>
+            <div class="form-group">
+              <label for="cf_role">Your Role</label>
+              <select id="cf_role">
+                <option value="">Select…</option>
+                <option>Mining Engineer</option>
+                <option>Geologist</option>
+                <option>Project Manager</option>
+                <option>Financial Analyst</option>
+                <option>Executive / Director</option>
+                <option>Consultant</option>
+                <option>Student / Academic</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cf_subject">Subject *</label>
+            <select id="cf_subject" required>
+              <option value="">Select enquiry type…</option>
+              <option value="sales">Sales & Pricing</option>
+              <option value="support">Technical Support</option>
+              <option value="partnership">Partnership / Integration</option>
+              <option value="data">Data & Benchmarks</option>
+              <option value="media">Media & Press</option>
+              <option value="general">General Enquiry</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cf_message">Message *</label>
+            <textarea id="cf_message" rows="5" placeholder="Tell us how we can help…" required></textarea>
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-start;gap:10px">
+            <input type="checkbox" id="cf_consent" style="width:auto;margin-top:2px;accent-color:var(--color-accent)" required />
+            <label for="cf_consent" style="font-size:0.78rem;color:var(--color-text-muted);font-weight:400;cursor:pointer">I agree to SESMine's <a href="#" style="color:var(--color-accent)">Privacy Policy</a> and consent to being contacted regarding my enquiry.</label>
+          </div>
+          <button type="submit" class="btn-submit" id="contactSubmitBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            Send Message
+          </button>
+        </form>
+      </div>
+      <div class="form-success" id="formSuccess" aria-live="polite">
+        <div class="form-success__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h3 class="form-success__title">Message Sent!</h3>
+        <p class="form-success__desc">Thanks for reaching out. A member of our team will be in touch within one business day.</p>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="contact-sidebar" aria-label="Contact information">
+
+      <!-- Contact methods -->
+      <div class="contact-info-card">
+        <h3>Contact Details</h3>
+        <div class="contact-method">
+          <div class="contact-method__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          </div>
+          <div>
+            <div class="contact-method__label">Email</div>
+            <div class="contact-method__value">hello@sesmine.com</div>
+            <div class="contact-method__note">General enquiries</div>
+          </div>
+        </div>
+        <div class="contact-method">
+          <div class="contact-method__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          </div>
+          <div>
+            <div class="contact-method__label">Support</div>
+            <div class="contact-method__value">support@sesmine.com</div>
+            <div class="contact-method__note">Technical issues & account help</div>
+          </div>
+        </div>
+        <div class="contact-method">
+          <div class="contact-method__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div>
+            <div class="contact-method__label">Office</div>
+            <div class="contact-method__value">Perth, Western Australia</div>
+            <div class="contact-method__note">Level 12, 1 William St, Perth WA 6000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Office hours -->
+      <div class="contact-info-card">
+        <h3>Office Hours <span style="font-size:0.72rem;color:var(--color-text-muted);font-weight:400">(AWST, UTC+8)</span></h3>
+        <div class="hours-grid">
+          <div class="hours-row"><span class="hours-row__day">Monday</span><span class="hours-row__time">8:00 am – 6:00 pm</span></div>
+          <div class="hours-row"><span class="hours-row__day">Tuesday</span><span class="hours-row__time">8:00 am – 6:00 pm</span></div>
+          <div class="hours-row"><span class="hours-row__day">Wednesday</span><span class="hours-row__time">8:00 am – 6:00 pm</span></div>
+          <div class="hours-row"><span class="hours-row__day">Thursday</span><span class="hours-row__time">8:00 am – 6:00 pm</span></div>
+          <div class="hours-row"><span class="hours-row__day">Friday</span><span class="hours-row__time">8:00 am – 5:00 pm</span></div>
+          <div class="hours-row"><span class="hours-row__day">Saturday</span><span class="hours-row__time closed">Closed</span></div>
+          <div class="hours-row"><span class="hours-row__day">Sunday</span><span class="hours-row__time closed">Closed</span></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--color-text-muted);margin:12px 0 0">Email support available 24/7 — we aim to respond within 4 hours during business hours.</p>
+      </div>
+
+      <!-- Team -->
+      <div class="contact-info-card">
+        <h3>Meet the Team</h3>
+        <div class="team-grid">
+          <div class="team-card">
+            <div class="team-avatar" style="background:#6366f1">JW</div>
+            <div><div class="team-name">James Wilson</div><div class="team-role">Founder & CEO</div></div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" style="background:#14b8a6">SN</div>
+            <div><div class="team-name">Sarah Nguyen</div><div class="team-role">Head of Engineering</div></div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" style="background:#2ecc71">AC</div>
+            <div><div class="team-name">Alex Chen</div><div class="team-role">Head of Data Science</div></div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" style="background:#ef4444">RP</div>
+            <div><div class="team-name">Ravi Patel</div><div class="team-role">Head of Geotechnical</div></div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <footer class="public-footer" role="contentinfo">
+    <span class="public-footer__copy">© 2026 SESMine. All rights reserved.</span>
+    <div class="public-footer__links">
+      <a href="/index.html">Home</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/resources.html">Resources</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+    </div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    async function submitContact(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('cf_firstName').value.trim();
+      const lastName  = document.getElementById('cf_lastName').value.trim();
+      const email     = document.getElementById('cf_email').value.trim();
+      const subject   = document.getElementById('cf_subject').value;
+      const message   = document.getElementById('cf_message').value.trim();
+      const consent   = document.getElementById('cf_consent').checked;
+
+      if (!firstName || !lastName || !email || !subject || !message) {
+        SESMine.showToast('Please fill in all required fields.', 'warning'); return;
+      }
+      if (!email.includes('@')) {
+        SESMine.showToast('Please enter a valid email address.', 'warning'); return;
+      }
+      if (!consent) {
+        SESMine.showToast('Please accept the privacy policy to continue.', 'warning'); return;
+      }
+
+      const btn = document.getElementById('contactSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      await new Promise(r => setTimeout(r, 1400));
+
+      document.getElementById('contactFormWrap').style.display = 'none';
+      document.getElementById('formSuccess').classList.add('visible');
+    }
+  </script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>
+

@@ -1,0 +1,118 @@
+{
+  "name": "SESMine — Mining Intelligence Platform",
+  "short_name": "SESMine",
+  "description": "The all-in-one mining intelligence platform for economics, engineering, safety, sustainability, procurement and innovation.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f1117",
+  "theme_color": "#f5a623",
+  "lang": "en-AU",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/assets/img/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/img/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/img/screenshots/dashboard-desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "SESMine Main Dashboard"
+    },
+    {
+      "src": "/assets/img/screenshots/economics-hub-desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Economics Hub — Live Commodity Prices"
+    },
+    {
+      "src": "/assets/img/screenshots/ai-predictor-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "AI CAPEX Predictor on Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open the main SESMine dashboard",
+      "url": "/dashboard/main-dashboard.html",
+      "icons": [{ "src": "/assets/img/icons/shortcut-dashboard.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Economics Hub",
+      "short_name": "Economics",
+      "description": "Live commodity prices and CAPEX benchmarks",
+      "url": "/hubs/economics-hub.html",
+      "icons": [{ "src": "/assets/img/icons/shortcut-economics.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "AI Predictor",
+      "short_name": "AI Predictor",
+      "description": "Run an AI CAPEX forecast",
+      "url": "/products/ai-predictor.html",
+      "icons": [{ "src": "/assets/img/icons/shortcut-ai.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Safety Hub",
+      "short_name": "Safety",
+      "description": "TRIFR tracking and incident management",
+      "url": "/hubs/safety-hub.html",
+      "icons": [{ "src": "/assets/img/icons/shortcut-safety.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mining News — SESMine</title>
+  <meta name="description" content="Latest mining industry news, commodity market updates and technology developments from SESMine." />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary);margin:0;}
+    .public-nav{position:sticky;top:0;z-index:200;background:rgba(15,17,23,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--color-border);padding:0 40px;display:flex;align-items:center;height:60px;gap:32px;}
+    .public-nav__logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+    .public-nav__logo img{height:26px;}
+    .public-nav__logo-text{font-size:1rem;font-weight:800;color:var(--color-text-primary);letter-spacing:-0.03em;}
+    .public-nav__links{display:flex;gap:4px;flex:1;}
+    .public-nav__links a{padding:6px 14px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;border-radius:var(--radius-md);transition:background .15s,color .15s;}
+    .public-nav__links a:hover{background:var(--color-bg-hover);color:var(--color-text-primary);}
+    .public-nav__links a.active{color:var(--color-accent);font-weight:600;}
+    .public-nav__actions{display:flex;gap:8px;flex-shrink:0;}
+    .btn-nav-login{padding:7px 16px;background:none;border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-secondary);font-size:0.875rem;font-weight:500;text-decoration:none;transition:all .15s;}
+    .btn-nav-login:hover{border-color:var(--color-accent);color:var(--color-accent);}
+    .btn-nav-cta{padding:7px 16px;background:var(--color-accent);border:none;border-radius:var(--radius-md);color:#fff;font-size:0.875rem;font-weight:700;text-decoration:none;transition:background .2s;}
+    .btn-nav-cta:hover{background:var(--color-accent-dark);}
+    .page-hero{padding:64px 40px 40px;text-align:center;max-width:640px;margin:0 auto;}
+    .page-hero__eyebrow{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-accent);margin-bottom:14px;}
+    .page-hero__title{font-size:2.4rem;font-weight:900;letter-spacing:-0.04em;margin:0 0 14px;}
+    .page-hero__desc{font-size:0.95rem;color:var(--color-text-secondary);line-height:1.6;margin:0;}
+    .news-layout{max-width:1200px;margin:0 auto;padding:0 40px 80px;display:grid;grid-template-columns:1fr 320px;gap:40px;align-items:start;}
+    @media(max-width:900px){.news-layout{grid-template-columns:1fr;}}
+
+    /* ── Category filters ── */
+    .news-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+    .news-filter-btn{padding:6px 16px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:999px;font-size:0.78rem;font-weight:500;color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+    .news-filter-btn:hover{border-color:var(--color-accent);color:var(--color-accent);}
+    .news-filter-btn.active{background:var(--color-accent);border-color:var(--color-accent);color:#fff;font-weight:700;}
+
+    /* ── Featured article ── */
+    .featured-article{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:28px;margin-bottom:24px;animation:fadeInUp 0.4s ease both;cursor:pointer;transition:box-shadow .2s,transform .2s;}
+    .featured-article:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+    .featured-article__tag{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:10px;display:inline-block;}
+    .featured-article__title{font-size:1.2rem;font-weight:800;letter-spacing:-0.02em;margin:0 0 10px;line-height:1.3;}
+    .featured-article__excerpt{font-size:0.875rem;color:var(--color-text-secondary);line-height:1.6;margin:0 0 16px;}
+    .featured-article__meta{font-size:0.72rem;color:var(--color-text-muted);display:flex;align-items:center;gap:12px;}
+    .featured-article__badge{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.25);color:var(--color-accent);padding:2px 8px;border-radius:999px;font-size:0.68rem;font-weight:700;text-transform:uppercase;}
+
+    /* ── Article list ── */
+    .article-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;animation:fadeInUp 0.4s ease both;cursor:pointer;transition:box-shadow .2s,border-color .2s;}
+    .article-card:hover{box-shadow:var(--shadow-sm);border-color:var(--color-accent);}
+    .article-card__tag{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:8px;display:inline-block;}
+    .article-card__title{font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 6px;line-height:1.35;}
+    .article-card__excerpt{font-size:0.78rem;color:var(--color-text-secondary);line-height:1.5;margin:0 0 10px;}
+    .article-card__meta{font-size:0.7rem;color:var(--color-text-muted);}
+
+    /* ── Sidebar ── */
+    .news-sidebar{display:flex;flex-direction:column;gap:20px;}
+    .sidebar-widget{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:20px;animation:fadeInUp 0.4s ease both;}
+    .sidebar-widget__title{font-size:0.82rem;font-weight:700;color:var(--color-text-primary);margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--color-border);}
+    .trending-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-border);cursor:pointer;}
+    .trending-item:last-child{border-bottom:none;}
+    .trending-item__num{font-size:1rem;font-weight:900;color:var(--color-accent);min-width:20px;line-height:1.2;}
+    .trending-item__title{font-size:0.78rem;font-weight:600;color:var(--color-text-primary);line-height:1.4;}
+    .trending-item__meta{font-size:0.68rem;color:var(--color-text-muted);margin-top:2px;}
+    .price-ticker{display:flex;flex-direction:column;gap:8px;}
+    .ticker-row{display:flex;align-items:center;justify-content:space-between;font-size:0.82rem;}
+    .ticker-row__name{color:var(--color-text-secondary);font-weight:500;}
+    .ticker-row__price{font-weight:700;color:var(--color-text-primary);}
+    .ticker-row__change{font-size:0.72rem;font-weight:700;}
+    .ticker-row__change.up{color:#2ecc71;}
+    .ticker-row__change.down{color:#ef4444;}
+
+    .public-footer{border-top:1px solid var(--color-border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+    .public-footer__copy{font-size:0.78rem;color:var(--color-text-muted);}
+    .public-footer__links{display:flex;gap:20px;}
+    .public-footer__links a{font-size:0.78rem;color:var(--color-text-muted);text-decoration:none;transition:color .15s;}
+    .public-footer__links a:hover{color:var(--color-text-primary);}
+  </style>
+</head>
+<body>
+  <nav class="public-nav" role="navigation" aria-label="Main navigation">
+    <a href="/index.html" class="public-nav__logo"><img src="/assets/img/logo.svg" alt="SESMine"/><span class="public-nav__logo-text">SESMine</span></a>
+    <div class="public-nav__links">
+      <a href="/index.html">Home</a>
+      <a href="/hub-preview.html">Hubs</a>
+      <a href="/products/ai-predictor.html">Products</a>
+      <a href="/resources.html">Resources</a>
+      <a href="/news.html" class="active" aria-current="page">News</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="public-nav__actions">
+      <a href="/auth/login.html" class="btn-nav-login">Sign In</a>
+      <a href="/auth/register.html" class="btn-nav-cta">Get Started</a>
+    </div>
+  </nav>
+
+  <section class="page-hero" aria-labelledby="news-title">
+    <p class="page-hero__eyebrow">Mining Intelligence</p>
+    <h1 class="page-hero__title" id="news-title">Industry News & Insights</h1>
+    <p class="page-hero__desc">Commodity markets, project announcements, technology breakthroughs and regulatory updates — curated daily for mining professionals.</p>
+  </section>
+
+  <main class="news-layout" role="main">
+    <div>
+      <!-- Filters -->
+      <div class="news-filters" role="group" aria-label="Filter news by category">
+        <button class="news-filter-btn active" onclick="filterNews('all',this)">All</button>
+        <button class="news-filter-btn" onclick="filterNews('markets',this)">Markets</button>
+        <button class="news-filter-btn" onclick="filterNews('projects',this)">Projects</button>
+        <button class="news-filter-btn" onclick="filterNews('technology',this)">Technology</button>
+        <button class="news-filter-btn" onclick="filterNews('esg',this)">ESG</button>
+        <button class="news-filter-btn" onclick="filterNews('policy',this)">Policy</button>
+      </div>
+
+      <!-- Featured -->
+      <div class="featured-article" onclick="SESMine.showToast('Full article coming soon.','info')" data-cat="markets" role="article" aria-label="Featured article">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span class="featured-article__badge">Featured</span>
+          <span class="featured-article__tag" style="color:#f5a623">Markets</span>
+        </div>
+        <h2 class="featured-article__title">Copper Hits 18-Month High as EV Demand Outpaces Supply Growth</h2>
+        <p class="featured-article__excerpt">Copper prices surged past $9,800/t this week as analysts revised demand forecasts upward following record EV sales data from China and Europe. Major producers including BHP and Freeport-McMoRan are accelerating expansion plans, but new supply is unlikely to reach market before 2028, sustaining the price premium.</p>
+        <div class="featured-article__meta">
+          <span>SESMine Intelligence</span>
+          <span>·</span>
+          <span>Jul 12, 2026</span>
+          <span>·</span>
+          <span>5 min read</span>
+        </div>
+      </div>
+
+      <!-- Article list -->
+      <div id="articleList">
+        <div class="article-card" data-cat="technology" onclick="SESMine.showToast('Full article coming soon.','info')" role="article" style="animation-delay:0.05s">
+          <span class="article-card__tag" style="color:#a855f7">Technology</span>
+          <h3 class="article-card__title">Rio Tinto Deploys 50th Autonomous Haul Truck at Gudai-Darri</h3>
+          <p class="article-card__excerpt">Rio Tinto's Gudai-Darri iron ore mine in the Pilbara has reached a milestone with its 50th Komatsu 930E AHS truck entering service, making it the world's largest autonomous mining fleet at a single site.</p>
+          <div class="article-card__meta">SESMine Intelligence · Jul 11, 2026 · 3 min read</div>
+        </div>
+        <div class="article-card" data-cat="projects" onclick="SESMine.showToast('Full article coming soon.','info')" role="article" style="animation-delay:0.1s">
+          <span class="article-card__tag" style="color:#6366f1">Projects</span>
+          <h3 class="article-card__title">BHP Approves $4.9B Copper South Australia Expansion</h3>
+          <p class="article-card__excerpt">BHP's board has approved the next stage of the Olympic Dam expansion, committing $4.9B to increase copper production capacity to 350,000 tonnes per annum by 2030.</p>
+          <div class="article-card__meta">SESMine Intelligence · Jul 10, 2026 · 4 min read</div>
+        </div>
+        <div class="article-card" data-cat="esg" onclick="SESMine.showToast('Full article coming soon.','info')" role="article" style="animation-delay:0.15s">
+          <span class="article-card__tag" style="color:#2ecc71">ESG</span>
+          <h3 class="article-card__title">ISSB Climate Disclosure Standards Now Mandatory for ASX 200 Miners</h3>
+          <p class="article-card__excerpt">Australia's ASIC has confirmed that ISSB-aligned climate disclosure requirements will apply to ASX 200 mining companies from FY2026 reporting, with smaller miners phased in by 2028.</p>
+          <div class="article-card__meta">SESMine Intelligence · Jul 9, 2026 · 4 min read</div>
+        </div>
+        <div class="article-card" data-cat="markets" onclick="SESMine.showToast('Full article coming soon.','info')" role="article" style="animation-delay:0.2s">
+          <span class="article-card__tag" style="color:#f5a623">Markets</span>
+          <h3 class="article-card__title">Lithium Price Recovery Accelerates — Spodumene Concentrate Up 28% QoQ</h3>
+          <p class="article-card__excerpt">Lithium carbonate and spodumene concentrate prices have rebounded sharply in Q2 2026 as Chinese battery manufacturers rebuild depleted inventories ahead of the second-half EV production ramp.</p>
+          <div class="article-card__meta">SESMine Intelligence · Jul 8, 2026 · 3 min read</div>
+        </div>
+        <div class="article-card" data-cat="policy" onclick="SESMine.showToast('Full article coming soon.','info')" role="article" style="animation-delay:0.25s">
+          <span class="article-card__tag" style="color:#14b8a6">Policy</span>
+          <h3 class="article-card__title">WA Government Releases Updated Mining Rehabilitation Framework</h3>
+          <p class="article-card__excerpt">Western Australia's Department of Mines has published revised rehabilitation bond requirements and progressive rehabilitation milestones, effective January 2027 for all new mining approvals.</p>
+          <div class="article-card__meta">SESMine Intelligence · Jul 7, 2026 · 5 min read</div>
+        </div>
+        <div class="article-card" data-cat="technology" onclick="SESMine.showToast('Full article coming soon.','info')" role="article" style="animation-delay:0.3s">
+          <span class="article-card__tag" style="color:#a855f7">Technology</span>
+          <h3 class="article-card__title">Sandvik Launches TH665B Battery-Electric Truck for Deep Underground Mines</h3>
+          <p class="article-card__excerpt">Sandvik has unveiled the production version of its TH665B 65-tonne battery-electric underground haul truck, with first deliveries scheduled for Q4 2026 to customers in Canada and Australia.</p>
+          <div class="article-card__meta">SESMine Intelligence · Jul 6, 2026 · 3 min read</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="news-sidebar" aria-label="News sidebar">
+      <!-- Live prices -->
+      <div class="sidebar-widget">
+        <h3 class="sidebar-widget__title">Live Commodity Prices</h3>
+        <div class="price-ticker">
+          <div class="ticker-row"><span class="ticker-row__name">Copper</span><span class="ticker-row__price">$9,842/t</span><span class="ticker-row__change up">↑ 2.4%</span></div>
+          <div class="ticker-row"><span class="ticker-row__name">Gold</span><span class="ticker-row__price">$3,284/oz</span><span class="ticker-row__change up">↑ 0.8%</span></div>
+          <div class="ticker-row"><span class="ticker-row__name">Iron Ore</span><span class="ticker-row__price">$108.40/t</span><span class="ticker-row__change down">↓ 1.1%</span></div>
+          <div class="ticker-row"><span class="ticker-row__name">Lithium</span><span class="ticker-row__price">$14,200/t</span><span class="ticker-row__change up">↑ 5.2%</span></div>
+          <div class="ticker-row"><span class="ticker-row__name">Nickel</span><span class="ticker-row__price">$18,640/t</span><span class="ticker-row__change down">↓ 0.4%</span></div>
+          <div class="ticker-row"><span class="ticker-row__name">Silver</span><span class="ticker-row__price">$34.82/oz</span><span class="ticker-row__change up">↑ 1.2%</span></div>
+        </div>
+        <a href="/auth/register.html" style="display:block;text-align:center;margin-top:14px;font-size:0.75rem;color:var(--color-accent);font-weight:600;text-decoration:none">View all prices in Economics Hub →</a>
+      </div>
+      <!-- Trending -->
+      <div class="sidebar-widget">
+        <h3 class="sidebar-widget__title">Trending This Week</h3>
+        <div>
+          <div class="trending-item" onclick="SESMine.showToast('Full article coming soon.','info')">
+            <span class="trending-item__num">1</span>
+            <div><div class="trending-item__title">Copper supply deficit widens to 480,000t in 2026</div><div class="trending-item__meta">Markets · 8,420 views</div></div>
+          </div>
+          <div class="trending-item" onclick="SESMine.showToast('Full article coming soon.','info')">
+            <span class="trending-item__num">2</span>
+            <div><div class="trending-item__title">Australia's critical minerals strategy — what miners need to know</div><div class="trending-item__meta">Policy · 6,180 views</div></div>
+          </div>
+          <div class="trending-item" onclick="SESMine.showToast('Full article coming soon.','info')">
+            <span class="trending-item__num">3</span>
+            <div><div class="trending-item__title">Autonomous drilling achieves 94% utilisation at Pilbara site</div><div class="trending-item__meta">Technology · 5,240 views</div></div>
+          </div>
+          <div class="trending-item" onclick="SESMine.showToast('Full article coming soon.','info')">
+            <span class="trending-item__num">4</span>
+            <div><div class="trending-item__title">Gold hits new all-time high of $3,340/oz intraday</div><div class="trending-item__meta">Markets · 4,820 views</div></div>
+          </div>
+          <div class="trending-item" onclick="SESMine.showToast('Full article coming soon.','info')">
+            <span class="trending-item__num">5</span>
+            <div><div class="trending-item__title">ANCOLD releases updated tailings dam safety guidelines</div><div class="trending-item__meta">Safety · 3,960 views</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- CTA -->
+      <div class="sidebar-widget" style="background:linear-gradient(135deg,rgba(245,166,35,0.1),var(--color-surface));border-color:rgba(245,166,35,0.3);text-align:center">
+        <div style="font-size:0.875rem;font-weight:700;color:var(--color-text-primary);margin-bottom:8px">Get Intelligence in Your Inbox</div>
+        <div style="font-size:0.78rem;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.5">Weekly mining intelligence briefing — free for SESMine members.</div>
+        <a href="/auth/register.html" style="display:block;padding:9px;background:var(--color-accent);color:#fff;border-radius:var(--radius-md);font-size:0.82rem;font-weight:700;text-decoration:none;transition:background .2s">Start Free Trial</a>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="public-footer" role="contentinfo">
+    <span class="public-footer__copy">© 2026 SESMine. All rights reserved.</span>
+    <div class="public-footer__links">
+      <a href="/index.html">Home</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/resources.html">Resources</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    function filterNews(cat, btn) {
+      document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.article-card').forEach(card => {
+        card.style.display = (cat === 'all' || card.dataset.cat === cat) ? 'block' : 'none';
+      });
+    }
+  </script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>

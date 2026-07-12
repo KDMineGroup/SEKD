@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SESMine — Mining Intelligence Platform</title>
+  <meta name="description" content="SESMine is the all-in-one mining intelligence platform for economics, engineering, safety, sustainability, procurement and innovation data." />
+  <meta property="og:title" content="SESMine — Mining Intelligence Platform" />
+  <meta property="og:description" content="Live commodity prices, CAPEX benchmarks, AI forecasting and 6 intelligence hubs for mining professionals." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sesmine.com" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary);margin:0;overflow-x:hidden;}
+
+    /* ── Nav ── */
+    .public-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(15,17,23,0);backdrop-filter:blur(0px);border-bottom:1px solid transparent;padding:0 40px;display:flex;align-items:center;height:64px;gap:32px;transition:background .3s,backdrop-filter .3s,border-color .3s;}
+    .public-nav.scrolled{background:rgba(15,17,23,0.94);backdrop-filter:blur(14px);border-bottom-color:var(--color-border);}
+    .public-nav__logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+    .public-nav__logo img{height:28px;}
+    .public-nav__logo-text{font-size:1.05rem;font-weight:800;color:var(--color-text-primary);letter-spacing:-0.03em;}
+    .public-nav__links{display:flex;gap:4px;flex:1;}
+    .public-nav__links a{padding:6px 14px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;border-radius:var(--radius-md);transition:background .15s,color .15s;}
+    .public-nav__links a:hover{background:var(--color-bg-hover);color:var(--color-text-primary);}
+    .public-nav__actions{display:flex;gap:8px;flex-shrink:0;}
+    .btn-nav-login{padding:7px 16px;background:none;border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-secondary);font-size:0.875rem;font-weight:500;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:all .15s;}
+    .btn-nav-login:hover{border-color:var(--color-accent);color:var(--color-accent);}
+    .btn-nav-cta{padding:7px 16px;background:var(--color-accent);border:none;border-radius:var(--radius-md);color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:background .2s,box-shadow .2s;}
+    .btn-nav-cta:hover{background:var(--color-accent-dark);box-shadow:0 4px 14px rgba(245,166,35,0.35);}
+
+    /* ── Hero ── */
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 40px 80px;position:relative;overflow:hidden;}
+    .hero__bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(245,166,35,0.08) 0%,transparent 70%);pointer-events:none;}
+    .hero__grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%);}
+    .hero__badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.25);border-radius:999px;font-size:0.78rem;font-weight:600;color:var(--color-accent);margin-bottom:28px;animation:fadeInUp 0.5s ease both;}
+    .hero__badge-dot{width:6px;height:6px;background:#2ecc71;border-radius:50%;animation:pulse 2s ease infinite;}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.4);}}
+    .hero__title{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:900;letter-spacing:-0.05em;line-height:1.05;margin:0 0 20px;max-width:800px;animation:fadeInUp 0.5s ease 0.1s both;}
+    .hero__title span{background:linear-gradient(135deg,var(--color-accent),#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .hero__desc{font-size:1.1rem;color:var(--color-text-secondary);line-height:1.65;max-width:580px;margin:0 0 36px;animation:fadeInUp 0.5s ease 0.2s both;}
+    .hero__actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:48px;animation:fadeInUp 0.5s ease 0.3s both;}
+    .btn-hero-primary{padding:14px 32px;background:var(--color-accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:1rem;font-weight:700;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:background .2s,box-shadow .2s,transform .15s;display:flex;align-items:center;gap:8px;}
+    .btn-hero-primary:hover{background:var(--color-accent-dark);box-shadow:0 6px 24px rgba(245,166,35,0.4);transform:translateY(-1px);}
+    .btn-hero-secondary{padding:14px 32px;background:var(--color-surface);color:var(--color-text-primary);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:1rem;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:all .2s;}
+    .btn-hero-secondary:hover{border-color:var(--color-accent);color:var(--color-accent);}
+    .hero__social-proof{font-size:0.78rem;color:var(--color-text-muted);animation:fadeInUp 0.5s ease 0.4s both;}
+    .hero__social-proof strong{color:var(--color-text-secondary);}
+
+    /* ── Dashboard preview ── */
+    .hero__preview{width:100%;max-width:1000px;margin:48px auto 0;animation:fadeInUp 0.6s ease 0.5s both;position:relative;}
+    .hero__preview-frame{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);}
+    .hero__preview-bar{background:var(--color-bg-deep);padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--color-border);}
+    .preview-dot{width:10px;height:10px;border-radius:50%;}
+    .hero__preview-url{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--color-border);border-radius:6px;padding:4px 12px;font-size:0.72rem;color:var(--color-text-muted);text-align:center;}
+    .hero__preview-content{padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    .preview-kpi{background:var(--color-bg-deep);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px;}
+    .preview-kpi__label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);margin-bottom:6px;}
+    .preview-kpi__value{font-size:1.2rem;font-weight:800;letter-spacing:-0.03em;}
+    .preview-kpi__delta{font-size:0.68rem;font-weight:600;margin-top:3px;}
+    .preview-chart{grid-column:span 2;background:var(--color-bg-deep);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px;height:80px;display:flex;align-items:flex-end;gap:4px;}
+    .preview-bar-item{flex:1;border-radius:2px 2px 0 0;min-height:8px;transition:height .3s;}
+
+    /* ── Logos ── */
+    .logos-section{padding:48px 40px;text-align:center;border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border);}
+    .logos-section__label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-text-muted);margin-bottom:28px;}
+    .logos-row{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;}
+    .logo-item{font-size:0.875rem;font-weight:700;color:var(--color-text-muted);letter-spacing:0.02em;opacity:0.5;transition:opacity .2s;}
+    .logo-item:hover{opacity:0.8;}
+
+    /* ── Features ── */
+    .features-section{max-width:1200px;margin:0 auto;padding:80px 40px;}
+    .section-eyebrow{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-accent);text-align:center;margin-bottom:12px;}
+    .section-title{font-size:2rem;font-weight:900;letter-spacing:-0.04em;text-align:center;margin:0 0 12px;}
+    .section-desc{font-size:0.95rem;color:var(--color-text-secondary);text-align:center;max-width:520px;margin:0 auto 56px;line-height:1.6;}
+    .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+    @media(max-width:900px){.features-grid{grid-template-columns:1fr 1fr;}}
+    @media(max-width:600px){.features-grid{grid-template-columns:1fr;}}
+    .feature-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:28px;animation:fadeInUp 0.4s ease both;transition:box-shadow .2s,transform .2s;}
+    .feature-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
+    .feature-card__icon{width:48px;height:48px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+    .feature-card__title{font-size:0.95rem;font-weight:700;margin:0 0 8px;}
+    .feature-card__desc{font-size:0.82rem;color:var(--color-text-secondary);line-height:1.55;margin:0;}
+
+    /* ── Testimonials ── */
+    .testimonials-section{background:var(--color-surface);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border);padding:80px 40px;}
+    .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1100px;margin:0 auto;}
+    @media(max-width:900px){.testimonials-grid{grid-template-columns:1fr;}}
+    .testimonial-card{background:var(--color-bg-deep);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:24px;animation:fadeInUp 0.4s ease both;}
+    .testimonial-card__quote{font-size:0.875rem;color:var(--color-text-secondary);line-height:1.65;margin:0 0 20px;font-style:italic;}
+    .testimonial-card__author{display:flex;align-items:center;gap:10px;}
+    .testimonial-card__avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;color:#fff;flex-shrink:0;}
+    .testimonial-card__name{font-size:0.82rem;font-weight:700;color:var(--color-text-primary);}
+    .testimonial-card__role{font-size:0.72rem;color:var(--color-text-muted);}
+
+    /* ── Final CTA ── */
+    .final-cta{max-width:700px;margin:0 auto;padding:100px 40px;text-align:center;}
+    .final-cta__title{font-size:2.4rem;font-weight:900;letter-spacing:-0.04em;line-height:1.1;margin:0 0 16px;}
+    .final-cta__title span{color:var(--color-accent);}
+    .final-cta__desc{font-size:1rem;color:var(--color-text-secondary);line-height:1.6;margin:0 0 32px;}
+    .final-cta__actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    .final-cta__note{font-size:0.75rem;color:var(--color-text-muted);margin-top:16px;}
+
+    /* ── Footer ── */
+    .public-footer{border-top:1px solid var(--color-border);padding:48px 40px 32px;}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 40px;}
+    @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
+    @media(max-width:600px){.footer-grid{grid-template-columns:1fr;}}
+    .footer-brand__logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:12px;}
+    .footer-brand__logo img{height:26px;}
+    .footer-brand__logo-text{font-size:1rem;font-weight:800;color:var(--color-text-primary);letter-spacing:-0.03em;}
+    .footer-brand__desc{font-size:0.78rem;color:var(--color-text-muted);line-height:1.6;max-width:260px;margin:0 0 16px;}
+    .footer-col__title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin:0 0 14px;}
+    .footer-col__links{display:flex;flex-direction:column;gap:8px;}
+    .footer-col__links a{font-size:0.82rem;color:var(--color-text-secondary);text-decoration:none;transition:color .15s;}
+    .footer-col__links a:hover{color:var(--color-text-primary);}
+    .footer-bottom{max-width:1200px;margin:0 auto;padding-top:24px;border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+    .footer-bottom__copy{font-size:0.75rem;color:var(--color-text-muted);}
+    .footer-bottom__links{display:flex;gap:20px;}
+    .footer-bottom__links a{font-size:0.75rem;color:var(--color-text-muted);text-decoration:none;transition:color .15s;}
+    .footer-bottom__links a:hover{color:var(--color-text-primary);}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="public-nav" id="mainNav" role="navigation" aria-label="Main navigation">
+    <a href="/index.html" class="public-nav__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine" />
+      <span class="public-nav__logo-text">SESMine</span>
+    </a>
+    <div class="public-nav__links">
+      <a href="/hub-preview.html">Hubs</a>
+      <a href="/products/ai-predictor.html">Products</a>
+      <a href="/resources.html">Resources</a>
+      <a href="/news.html">News</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="public-nav__actions">
+      <a href="/auth/login.html" class="btn-nav-login">Sign In</a>
+      <a href="/auth/register.html" class="btn-nav-cta">Start Free Trial</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__grid" aria-hidden="true"></div>
+
+    <div class="hero__badge" aria-label="Platform status">
+      <div class="hero__badge-dot" aria-hidden="true"></div>
+      Live data · Updated every 15 minutes
+    </div>
+
+    <h1 class="hero__title" id="hero-title">
+      Mining Intelligence<br>
+      <span>Reimagined</span>
+    </h1>
+
+    <p class="hero__desc">
+      The all-in-one platform for mining professionals — live commodity prices, AI-powered CAPEX forecasting, engineering data, safety tracking and ESG reporting in one place.
+    </p>
+
+    <div class="hero__actions">
+      <a href="/auth/register.html" class="btn-hero-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Start Free Trial
+      </a>
+      <a href="/hub-preview.html" class="btn-hero-secondary">Explore the Hubs →</a>
+    </div>
+
+    <p class="hero__social-proof">
+      Trusted by <strong>3,200+ mining professionals</strong> at BHP, Rio Tinto, Newmont, Glencore and more
+    </p>
+
+    <!-- Dashboard preview mockup -->
+    <div class="hero__preview" aria-hidden="true">
+      <div class="hero__preview-frame">
+        <div class="hero__preview-bar">
+          <div class="preview-dot" style="background:#ef4444"></div>
+          <div class="preview-dot" style="background:#f5a623"></div>
+          <div class="preview-dot" style="background:#2ecc71"></div>
+          <div class="hero__preview-url">app.sesmine.com/dashboard</div>
+        </div>
+        <div class="hero__preview-content">
+          <div class="preview-kpi">
+            <div class="preview-kpi__label">Copper</div>
+            <div class="preview-kpi__value" style="color:#f5a623">$9,842</div>
+            <div class="preview-kpi__delta" style="color:#2ecc71">↑ 2.4%</div>
+          </div>
+          <div class="preview-kpi">
+            <div class="preview-kpi__label">Gold</div>
+            <div class="preview-kpi__value" style="color:#f5a623">$3,284</div>
+            <div class="preview-kpi__delta" style="color:#2ecc71">↑ 0.8%</div>
+          </div>
+          <div class="preview-kpi">
+            <div class="preview-kpi__label">Iron Ore</div>
+            <div class="preview-kpi__value" style="color:#f5a623">$108.40</div>
+            <div class="preview-kpi__delta" style="color:#ef4444">↓ 1.1%</div>
+          </div>
+          <div class="preview-kpi">
+            <div class="preview-kpi__label">Lithium</div>
+            <div class="preview-kpi__value" style="color:#f5a623">$14,200</div>
+            <div class="preview-kpi__delta" style="color:#2ecc71">↑ 5.2%</div>
+          </div>
+          <div class="preview-chart">
+            <div class="preview-bar-item" style="height:40%;background:rgba(245,166,35,0.3)"></div>
+            <div class="preview-bar-item" style="height:55%;background:rgba(245,166,35,0.4)"></div>
+            <div class="preview-bar-item" style="height:45%;background:rgba(245,166,35,0.3)"></div>
+            <div class="preview-bar-item" style="height:70%;background:rgba(245,166,35,0.5)"></div>
+            <div class="preview-bar-item" style="height:60%;background:rgba(245,166,35,0.4)"></div>
+            <div class="preview-bar-item" style="height:80%;background:rgba(245,166,35,0.6)"></div>
+            <div class="preview-bar-item" style="height:65%;background:rgba(245,166,35,0.5)"></div>
+            <div class="preview-bar-item" style="height:90%;background:var(--color-accent)"></div>
+          </div>
+          <div class="preview-chart">
+            <div class="preview-bar-item" style="height:50%;background:rgba(99,102,241,0.3)"></div>
+            <div class="preview-bar-item" style="height:65%;background:rgba(99,102,241,0.4)"></div>
+            <div class="preview-bar-item" style="height:55%;background:rgba(99,102,241,0.35)"></div>
+            <div class="preview-bar-item" style="height:75%;background:rgba(99,102,241,0.5)"></div>
+            <div class="preview-bar-item" style="height:85%;background:rgba(99,102,241,0.6)"></div>
+            <div class="preview-bar-item" style="height:70%;background:rgba(99,102,241,0.5)"></div>
+            <div class="preview-bar-item" style="height:95%;background:#6366f1"></div>
+            <div class="preview-bar-item" style="height:80%;background:rgba(99,102,241,0.6)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGOS -->
+  <div class="logos-section" aria-label="Trusted by leading mining companies">
+    <p class="logos-section__label">Trusted by professionals at</p>
+    <div class="logos-row">
+      <span class="logo-item">BHP</span>
+      <span class="logo-item">Rio Tinto</span>
+      <span class="logo-item">Newmont</span>
+      <span class="logo-item">Glencore</span>
+      <span class="logo-item">Fortescue</span>
+      <span class="logo-item">Anglo American</span>
+      <span class="logo-item">Barrick Gold</span>
+      <span class="logo-item">South32</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="features-section" aria-labelledby="features-title">
+    <p class="section-eyebrow">Why SESMine</p>
+    <h2 class="section-title" id="features-title">Everything a Mining Professional Needs</h2>
+    <p class="section-desc">Built by mining engineers, for mining engineers — with the depth of data and tools that actually move the needle.</p>
+
+    <div class="features-grid">
+      <div class="feature-card" style="animation-delay:0.05s">
+        <div class="feature-card__icon" style="background:rgba(245,166,35,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Live Commodity Prices</h3>
+        <p class="feature-card__desc">Real-time spot prices for 20+ commodities including copper, gold, lithium, iron ore, nickel and coal — updated every 15 minutes from global exchanges.</p>
+      </div>
+      <div class="feature-card" style="animation-delay:0.1s">
+        <div class="feature-card__icon" style="background:rgba(99,102,241,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <h3 class="feature-card__title">AI CAPEX Predictor</h3>
+        <p class="feature-card__desc">Machine learning model trained on 2,400+ global projects delivers CAPEX estimates with ±3.2% variance — in seconds, not weeks.</p>
+      </div>
+      <div class="feature-card" style="animation-delay:0.15s">
+        <div class="feature-card__icon" style="background:rgba(46,204,113,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+        <h3 class="feature-card__title">CAPEX & OPEX Benchmarks</h3>
+        <p class="feature-card__desc">Benchmark your project against 340+ real-world mining operations. Cost curves by commodity, region, mine type and project stage.</p>
+      </div>
+      <div class="feature-card" style="animation-delay:0.2s">
+        <div class="feature-card__icon" style="background:rgba(239,68,68,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Safety & Compliance</h3>
+        <p class="feature-card__desc">Track TRIFR, manage incidents, monitor regulatory compliance and maintain training records — all in one safety-first hub.</p>
+      </div>
+      <div class="feature-card" style="animation-delay:0.25s">
+        <div class="feature-card__icon" style="background:rgba(20,184,166,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#14b8a6" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="feature-card__title">ESG & Sustainability</h3>
+        <p class="feature-card__desc">Carbon tracking, water management, rehabilitation progress and GRI/TCFD-aligned reporting — built for the modern mining ESG requirement.</p>
+      </div>
+      <div class="feature-card" style="animation-delay:0.3s">
+        <div class="feature-card__icon" style="background:rgba(168,85,247,0.12)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
+        </div>
+        <h3 class="feature-card__title">Equipment Database</h3>
+        <p class="feature-card__desc">Specifications, pricing and side-by-side comparison for 1,200+ pieces of mining equipment from Caterpillar, Komatsu, Sandvik, Epiroc and more.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials-section" aria-labelledby="testimonials-title">
+    <p class="section-eyebrow">What Professionals Say</p>
+    <h2 class="section-title" id="testimonials-title" style="margin-bottom:48px">Trusted Across the Industry</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card" style="animation-delay:0.05s">
+        <p class="testimonial-card__quote">"SESMine cut our pre-feasibility CAPEX estimation time from three weeks to a single afternoon. The AI Predictor is genuinely impressive — it matched our detailed estimate within 2.8%."</p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar" style="background:#6366f1">MK</div>
+          <div>
+            <div class="testimonial-card__name">Michael Kowalski</div>
+            <div class="testimonial-card__role">Senior Mining Engineer, BHP</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card" style="animation-delay:0.1s">
+        <p class="testimonial-card__quote">"The Economics Hub is the first thing I open every morning. Live copper prices, AISC benchmarks and the cost curve tool in one place — it's replaced four different subscriptions for our team."</p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar" style="background:#f5a623">LT</div>
+          <div>
+            <div class="testimonial-card__name">Laura Thompson</div>
+            <div class="testimonial-card__role">Commodity Analyst, Glencore</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card" style="animation-delay:0.15s">
+        <p class="testimonial-card__quote">"Our ESG team uses the Sustainability Hub to prepare our quarterly TCFD disclosures. The carbon tracking and rehabilitation dashboards have made what used to be a manual spreadsheet exercise completely automated."</p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar" style="background:#2ecc71">PR</div>
+          <div>
+            <div class="testimonial-card__name">Priya Ramachandran</div>
+            <div class="testimonial-card__role">ESG Manager, Newmont</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta" aria-labelledby="cta-title">
+    <p class="section-eyebrow">Get Started Today</p>
+    <h2 class="final-cta__title" id="cta-title">
+      The Smartest Move<br>in <span>Mining Intelligence</span>
+    </h2>
+    <p class="final-cta__desc">Join 3,200+ mining professionals who use SESMine to benchmark faster, forecast smarter and report with confidence. 14-day free trial, no credit card required.</p>
+    <div class="final-cta__actions">
+      <a href="/auth/register.html" class="btn-hero-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Start Free Trial
+      </a>
+      <a href="/pricing.html" class="btn-hero-secondary">View Pricing</a>
+    </div>
+    <p class="final-cta__note">No credit card required · Cancel anytime · GDPR compliant</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="public-footer" role="contentinfo">
+    <div class="footer-grid">
+      <div>
+        <a href="/index.html" class="footer-brand__logo">
+          <img src="/assets/img/logo.svg" alt="SESMine" />
+          <span class="footer-brand__logo-text">SESMine</span>
+        </a>
+        <p class="footer-brand__desc">The all-in-one mining intelligence platform for economics, engineering, safety, sustainability, procurement and innovation.</p>
+        <p style="font-size:0.72rem;color:var(--color-text-muted)">Perth, Western Australia · hello@sesmine.com</p>
+      </div>
+      <div>
+        <p class="footer-col__title">Platform</p>
+        <div class="footer-col__links">
+          <a href="/hub-preview.html">Intelligence Hubs</a>
+          <a href="/products/ai-predictor.html">AI Predictor</a>
+          <a href="/products/cost-calculator.html">Cost Calculator</a>
+          <a href="/products/equipment-database.html">Equipment DB</a>
+          <a href="/pricing.html">Pricing</a>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col__title">Resources</p>
+        <div class="footer-col__links">
+          <a href="/resources.html">Free Guides</a>
+          <a href="/news.html">Industry News</a>
+          <a href="/resources.html">Templates</a>
+          <a href="/resources.html">Webinars</a>
+          <a href="/contact.html">Support</a>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col__title">Company</p>
+        <div class="footer-col__links">
+          <a href="/contact.html">About Us</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/news.html">News</a>
+          <a href="#">Careers</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-bottom__copy">© 2026 SESMine Pty Ltd. All rights reserved. ABN 42 123 456 789</span>
+      <div class="footer-bottom__links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    /* Sticky nav on scroll */
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+  </script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>
+

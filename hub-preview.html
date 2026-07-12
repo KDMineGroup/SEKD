@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intelligence Hubs — SESMine</title>
+  <meta name="description" content="SESMine Intelligence Hubs — Economics, Engineering, Safety, Sustainability, Procurement and Innovation data in one platform." />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary);margin:0;}
+    .public-nav{position:sticky;top:0;z-index:200;background:rgba(15,17,23,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--color-border);padding:0 40px;display:flex;align-items:center;height:60px;gap:32px;}
+    .public-nav__logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+    .public-nav__logo img{height:26px;}
+    .public-nav__logo-text{font-size:1rem;font-weight:800;color:var(--color-text-primary);letter-spacing:-0.03em;}
+    .public-nav__links{display:flex;gap:4px;flex:1;}
+    .public-nav__links a{padding:6px 14px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;border-radius:var(--radius-md);transition:background .15s,color .15s;}
+    .public-nav__links a:hover{background:var(--color-bg-hover);color:var(--color-text-primary);}
+    .public-nav__links a.active{color:var(--color-accent);font-weight:600;}
+    .public-nav__actions{display:flex;gap:8px;flex-shrink:0;}
+    .btn-nav-login{padding:7px 16px;background:none;border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-secondary);font-size:0.875rem;font-weight:500;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:all .15s;}
+    .btn-nav-login:hover{border-color:var(--color-accent);color:var(--color-accent);}
+    .btn-nav-cta{padding:7px 16px;background:var(--color-accent);border:none;border-radius:var(--radius-md);color:#fff;font-size:0.875rem;font-weight:700;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:background .2s;}
+    .btn-nav-cta:hover{background:var(--color-accent-dark);}
+
+    /* ── Hero ── */
+    .hubs-hero{padding:80px 40px 56px;text-align:center;max-width:760px;margin:0 auto;}
+    .hubs-hero__eyebrow{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-accent);margin-bottom:16px;}
+    .hubs-hero__title{font-size:2.8rem;font-weight:900;letter-spacing:-0.04em;line-height:1.1;margin:0 0 18px;}
+    .hubs-hero__title span{color:var(--color-accent);}
+    .hubs-hero__desc{font-size:1.05rem;color:var(--color-text-secondary);line-height:1.65;margin:0 0 32px;}
+    .hubs-hero__actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    .btn-primary{padding:13px 28px;background:var(--color-accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:0.95rem;font-weight:700;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:background .2s,box-shadow .2s;}
+    .btn-primary:hover{background:var(--color-accent-dark);box-shadow:0 4px 20px rgba(245,166,35,0.35);}
+    .btn-secondary{padding:13px 28px;background:var(--color-surface);color:var(--color-text-primary);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:0.95rem;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;transition:all .2s;}
+    .btn-secondary:hover{border-color:var(--color-accent);color:var(--color-accent);}
+
+    /* ── Hub cards ── */
+    .hubs-section{max-width:1200px;margin:0 auto;padding:0 40px 80px;}
+    .hubs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;margin-bottom:64px;}
+    .hub-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:28px;animation:fadeInUp 0.4s ease both;transition:box-shadow .25s,transform .25s,border-color .25s;text-decoration:none;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+    .hub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius-xl) var(--radius-xl) 0 0;}
+    .hub-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px);}
+    .hub-card__icon{width:52px;height:52px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;margin-bottom:18px;flex-shrink:0;}
+    .hub-card__name{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin:0 0 8px;}
+    .hub-card__desc{font-size:0.85rem;color:var(--color-text-secondary);line-height:1.55;margin:0 0 20px;flex:1;}
+    .hub-card__features{display:flex;flex-direction:column;gap:7px;margin-bottom:20px;}
+    .hub-card__feature{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--color-text-secondary);}
+    .hub-card__feature svg{flex-shrink:0;}
+    .hub-card__footer{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--color-border);}
+    .hub-card__stat{font-size:0.72rem;color:var(--color-text-muted);}
+    .hub-card__cta{font-size:0.82rem;font-weight:700;display:flex;align-items:center;gap:4px;}
+
+    /* ── Stats strip ── */
+    .stats-strip{background:var(--color-surface);border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border);padding:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center;margin-bottom:64px;}
+    @media(max-width:700px){.stats-strip{grid-template-columns:repeat(2,1fr);}}
+    .stat-item__value{font-size:2rem;font-weight:900;color:var(--color-accent);letter-spacing:-0.04em;line-height:1;}
+    .stat-item__label{font-size:0.78rem;color:var(--color-text-muted);margin-top:6px;}
+
+    /* ── Feature comparison ── */
+    .compare-section{margin-bottom:64px;}
+    .compare-section h2{font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;text-align:center;margin:0 0 32px;}
+    .compare-table{width:100%;border-collapse:collapse;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;}
+    .compare-table th{padding:14px 18px;font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;background:var(--color-bg-deep);border-bottom:1px solid var(--color-border);text-align:left;color:var(--color-text-muted);}
+    .compare-table td{padding:14px 18px;font-size:0.875rem;border-bottom:1px solid var(--color-border);color:var(--color-text-secondary);}
+    .compare-table tr:last-child td{border-bottom:none;}
+    .compare-table tr:hover td{background:var(--color-bg-hover);}
+    .compare-table td:first-child{font-weight:600;color:var(--color-text-primary);}
+    .check{color:#2ecc71;font-size:1rem;}
+    .cross{color:var(--color-text-muted);font-size:1rem;}
+
+    /* ── CTA banner ── */
+    .cta-banner{background:linear-gradient(135deg,rgba(245,166,35,0.12) 0%,var(--color-surface) 60%);border:1px solid rgba(245,166,35,0.3);border-radius:var(--radius-xl);padding:48px;text-align:center;margin-bottom:64px;animation:fadeInUp 0.4s ease both;}
+    .cta-banner h2{font-size:1.8rem;font-weight:900;letter-spacing:-0.03em;margin:0 0 12px;}
+    .cta-banner p{font-size:0.95rem;color:var(--color-text-secondary);margin:0 0 28px;max-width:500px;margin-left:auto;margin-right:auto;}
+    .cta-banner__actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+    .public-footer{border-top:1px solid var(--color-border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+    .public-footer__copy{font-size:0.78rem;color:var(--color-text-muted);}
+    .public-footer__links{display:flex;gap:20px;}
+    .public-footer__links a{font-size:0.78rem;color:var(--color-text-muted);text-decoration:none;transition:color .15s;}
+    .public-footer__links a:hover{color:var(--color-text-primary);}
+  </style>
+</head>
+<body>
+
+  <nav class="public-nav" role="navigation" aria-label="Main navigation">
+    <a href="/index.html" class="public-nav__logo"><img src="/assets/img/logo.svg" alt="SESMine"/><span class="public-nav__logo-text">SESMine</span></a>
+    <div class="public-nav__links">
+      <a href="/index.html">Home</a>
+      <a href="/hub-preview.html" class="active" aria-current="page">Hubs</a>
+      <a href="/products/ai-predictor.html">Products</a>
+      <a href="/resources.html">Resources</a>
+      <a href="/news.html">News</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="public-nav__actions">
+      <a href="/auth/login.html" class="btn-nav-login">Sign In</a>
+      <a href="/auth/register.html" class="btn-nav-cta">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hubs-hero" aria-labelledby="hubs-title">
+    <p class="hubs-hero__eyebrow">Intelligence Hubs</p>
+    <h1 class="hubs-hero__title" id="hubs-title">Every Dimension of Mining,<br><span>In One Platform</span></h1>
+    <p class="hubs-hero__desc">Six purpose-built intelligence hubs covering economics, engineering, procurement, safety, sustainability and innovation — giving mining professionals a single source of truth for every decision.</p>
+    <div class="hubs-hero__actions">
+      <a href="/auth/register.html" class="btn-primary">Start Free Trial</a>
+      <a href="/pricing.html" class="btn-secondary">View Pricing</a>
+    </div>
+  </section>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip" aria-label="Platform statistics">
+    <div class="stat-item"><div class="stat-item__value">6</div><div class="stat-item__label">Intelligence Hubs</div></div>
+    <div class="stat-item"><div class="stat-item__value">2,400+</div><div class="stat-item__label">Data points updated daily</div></div>
+    <div class="stat-item"><div class="stat-item__value">48</div><div class="stat-item__label">Commodity & market feeds</div></div>
+    <div class="stat-item"><div class="stat-item__value">1,200+</div><div class="stat-item__label">Equipment specifications</div></div>
+  </div>
+
+  <main class="hubs-section" role="main">
+
+    <!-- Hub cards -->
+    <div class="hubs-grid">
+
+      <!-- Economics -->
+      <a href="/auth/register.html" class="hub-card" style="animation-delay:0.05s;--hub-color:#f5a623" aria-label="Economics Hub">
+        <style>.hub-card:nth-child(1)::before{background:#f5a623;}</style>
+        <div class="hub-card__icon" style="background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.25)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h2 class="hub-card__name" style="color:#f5a623">Economics Hub</h2>
+        <p class="hub-card__desc">Live commodity prices, CAPEX/OPEX benchmarks, project valuations, cost curves and financial modelling tools for mining economics.</p>
+        <div class="hub-card__features">
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Live commodity price feeds</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>CAPEX benchmarks — 340+ projects</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>NPV / IRR / payback calculators</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Cost curve analysis by commodity</div>
+        </div>
+        <div class="hub-card__footer">
+          <span class="hub-card__stat">Updated daily</span>
+          <span class="hub-card__cta" style="color:#f5a623">Explore Hub <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Engineering -->
+      <a href="/auth/register.html" class="hub-card" style="animation-delay:0.1s" aria-label="Engineering Hub">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6366f1;border-radius:var(--radius-xl) var(--radius-xl) 0 0"></div>
+        <div class="hub-card__icon" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <h2 class="hub-card__name" style="color:#6366f1">Engineering Hub</h2>
+        <p class="hub-card__desc">Technical specifications, project tracking, geotechnical data, structural standards and engineering document management.</p>
+        <div class="hub-card__features">
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Project progress tracking</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Rock mass & slope stability data</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>2,400+ technical spec sheets</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Engineering standards library</div>
+        </div>
+        <div class="hub-card__footer">
+          <span class="hub-card__stat">42 active projects</span>
+          <span class="hub-card__cta" style="color:#6366f1">Explore Hub <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Procurement -->
+      <a href="/auth/register.html" class="hub-card" style="animation-delay:0.15s" aria-label="Procurement Hub">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#14b8a6;border-radius:var(--radius-xl) var(--radius-xl) 0 0"></div>
+        <div class="hub-card__icon" style="background:rgba(20,184,166,0.12);border:1px solid rgba(20,184,166,0.25)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#14b8a6" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        </div>
+        <h2 class="hub-card__name" style="color:#14b8a6">Procurement Hub</h2>
+        <p class="hub-card__desc">Vendor database, contract management, purchase order tracking and supply chain spend analytics for mining operations.</p>
+        <div class="hub-card__features">
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>340+ approved vendor register</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Contract lifecycle management</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Spend analysis by category</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Savings opportunity identification</div>
+        </div>
+        <div class="hub-card__footer">
+          <span class="hub-card__stat">$182M spend tracked</span>
+          <span class="hub-card__cta" style="color:#14b8a6">Explore Hub <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Safety -->
+      <a href="/auth/register.html" class="hub-card" style="animation-delay:0.2s" aria-label="Safety Hub">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#ef4444;border-radius:var(--radius-xl) var(--radius-xl) 0 0"></div>
+        <div class="hub-card__icon" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h2 class="hub-card__name" style="color:#ef4444">Safety Hub</h2>
+        <p class="hub-card__desc">TRIFR tracking, incident management, regulatory compliance, training records and safety protocol documentation.</p>
+        <div class="hub-card__features">
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Real-time TRIFR & LTIFR tracking</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Incident register & investigation</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Regulatory compliance dashboard</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Training compliance tracking</div>
+        </div>
+        <div class="hub-card__footer">
+          <span class="hub-card__stat">142 days LTI-free</span>
+          <span class="hub-card__cta" style="color:#ef4444">Explore Hub <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Sustainability -->
+      <a href="/auth/register.html" class="hub-card" style="animation-delay:0.25s" aria-label="Sustainability Hub">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#2ecc71;border-radius:var(--radius-xl) var(--radius-xl) 0 0"></div>
+        <div class="hub-card__icon" style="background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.25)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h2 class="hub-card__name" style="color:#2ecc71">Sustainability Hub</h2>
+        <p class="hub-card__desc">Carbon emissions tracking, water management, land rehabilitation progress and GRI/TCFD-aligned ESG reporting.</p>
+        <div class="hub-card__features">
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Scope 1, 2 & 3 emissions tracking</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Water & waste management</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Rehabilitation progress mapping</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>GRI, TCFD & ISSB reporting</div>
+        </div>
+        <div class="hub-card__footer">
+          <span class="hub-card__stat">−8.2% emissions YoY</span>
+          <span class="hub-card__cta" style="color:#2ecc71">Explore Hub <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Innovation -->
+      <a href="/auth/register.html" class="hub-card" style="animation-delay:0.3s" aria-label="Innovation Hub">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#a855f7;border-radius:var(--radius-xl) var(--radius-xl) 0 0"></div>
+        <div class="hub-card__icon" style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <h2 class="hub-card__name" style="color:#a855f7">Innovation Hub</h2>
+        <p class="hub-card__desc">Technology radar, automation initiative tracking, R&D pipeline management and curated mining industry trend intelligence.</p>
+        <div class="hub-card__features">
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Technology readiness radar</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Automation ROI tracker</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>R&D investment pipeline</div>
+          <div class="hub-card__feature"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Curated industry trend reports</div>
+        </div>
+        <div class="hub-card__footer">
+          <span class="hub-card__stat">$28M R&D tracked</span>
+          <span class="hub-card__cta" style="color:#a855f7">Explore Hub <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Feature comparison table -->
+    <div class="compare-section" aria-labelledby="compare-title">
+      <h2 id="compare-title">What's Inside Each Hub</h2>
+      <table class="compare-table" aria-label="Hub feature comparison">
+        <thead>
+          <tr>
+            <th scope="col">Feature</th>
+            <th scope="col">Free</th>
+            <th scope="col">Pro</th>
+            <th scope="col">Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>All 6 Intelligence Hubs</td><td class="cross">Preview only</td><td class="check">✓ Full access</td><td class="check">✓ Full access</td></tr>
+          <tr><td>Live commodity price feeds</td><td class="cross">Delayed 24h</td><td class="check">✓ Real-time</td><td class="check">✓ Real-time</td></tr>
+          <tr><td>AI CAPEX Predictor</td><td class="cross">5 runs/month</td><td class="check">✓ Unlimited</td><td class="check">✓ Unlimited + API</td></tr>
+          <tr><td>Cost Calculator (CAPEX/OPEX/LOM)</td><td class="check">✓ Basic</td><td class="check">✓ Full</td><td class="check">✓ Full + export</td></tr>
+          <tr><td>Equipment Database</td><td class="check">✓ 200 items</td><td class="check">✓ 1,200+ items</td><td class="check">✓ 1,200+ + custom</td></tr>
+          <tr><td>ESG & Sustainability reporting</td><td class="cross">—</td><td class="check">✓ Included</td><td class="check">✓ Custom reports</td></tr>
+          <tr><td>Safety incident management</td><td class="cross">—</td><td class="check">✓ Included</td><td class="check">✓ Multi-site</td></tr>
+          <tr><td>PDF / Excel exports</td><td class="cross">—</td><td class="check">✓ All formats</td><td class="check">✓ All formats</td></tr>
+          <tr><td>Team seats</td><td>1</td><td>Up to 5</td><td>Unlimited</td></tr>
+          <tr><td>Priority support</td><td class="cross">—</td><td class="check">✓ Email</td><td class="check">✓ Dedicated CSM</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CTA Banner -->
+    <div class="cta-banner" aria-labelledby="cta-title">
+      <h2 id="cta-title">Ready to Explore the Hubs?</h2>
+      <p>Join 3,200+ mining professionals using SESMine to make faster, smarter decisions. Start your 14-day free trial — no credit card required.</p>
+      <div class="cta-banner__actions">
+        <a href="/auth/register.html" class="btn-primary">Start Free Trial</a>
+        <a href="/contact.html" class="btn-secondary">Talk to Sales</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="public-footer" role="contentinfo">
+    <span class="public-footer__copy">© 2026 SESMine. All rights reserved.</span>
+    <div class="public-footer__links">
+      <a href="/index.html">Home</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/resources.html">Resources</a>
+      <a href="/contact.html">Contact</a>
+      <a href="#">Privacy Policy</a>
+    </div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>
