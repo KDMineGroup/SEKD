@@ -1,0 +1,241 @@
+/* ============================================================
+   SESMine — seo-enhancements.css
+   Accessibility, readability & crawlability enhancements.
+   NOTE: SEO is primarily server-side. This file handles the
+   visual/structural accessibility that supports SEO signals.
+   ============================================================ */
+
+/* ── 1. Landmark & Structural Clarity ── */
+
+/* Ensure main content is visually distinct for AT users */
+main[role="main"],
+main {
+  display: block; /* IE11 fix */
+  outline: none;
+}
+
+/* Ensure article and section have proper spacing */
+article,
+section {
+  display: block;
+}
+
+/* ── 2. Heading Hierarchy Visual Aids ── */
+
+/* Prevent orphaned headings — always followed by content */
+h1 + p,
+h2 + p,
+h3 + p {
+  margin-top: 0;
+}
+
+/* Ensure headings never appear at bottom of a column */
+h1, h2, h3, h4, h5, h6 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* ── 3. Link Accessibility ── */
+
+/* Ensure all links have visible focus states */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[tabindex]:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* External link indicator */
+a[target="_blank"]::after {
+  content: '\00a0↗';
+  font-size: 0.75em;
+  opacity: 0.6;
+  vertical-align: super;
+}
+
+/* Don't apply to icon-only links */
+a[target="_blank"][aria-label]::after,
+a[target="_blank"]:has(svg)::after {
+  content: none;
+}
+
+/* ── 4. Image Accessibility ── */
+
+/* Flag images without alt text (dev helper) */
+img:not([alt]) {
+  outline: 3px solid var(--color-danger);
+  outline-offset: 2px;
+}
+
+/* Decorative images should be hidden from AT */
+img[alt=""],
+img[role="presentation"] {
+  pointer-events: none;
+}
+
+/* ── 5. Colour Contrast Enforcement ── */
+
+/* Minimum contrast for body text — WCAG AA (4.5:1) */
+body {
+  color: var(--color-text-primary); /* #f1f5f9 on #0b1220 = ~14:1 ✓ */
+}
+
+/* Muted text must still meet 3:1 for large text */
+.text-muted,
+.caption,
+.meta-text {
+  color: var(--color-text-muted); /* #64748b — use sparingly on dark bg */
+}
+
+/* ── 6. Reading Width Optimisation ── */
+
+/* Optimal line length for readability (45–75 chars) */
+.readable {
+  max-width: 68ch;
+  line-height: 1.75;
+}
+
+.readable-wide { max-width: 80ch; }
+.readable-narrow { max-width: 52ch; }
+
+/* ── 7. Print Styles ── */
+@media print {
+  /* Hide non-content elements */
+  .navbar,
+  .sidebar,
+  .topbar,
+  .footer,
+  .btn,
+  .toast-container,
+  [aria-hidden="true"] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
+
+  /* Show full URLs for links */
+  a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  /* Don't show URL for internal/anchor links */
+  a[href^="#"]::after,
+  a[href^="javascript"]::after {
+    content: none;
+  }
+
+  h1, h2, h3 { page-break-after: avoid; }
+  img { max-width: 100% !important; }
+  .card, .panel { box-shadow: none; border: 1px solid #ccc; }
+}
+
+/* ── 8. High Contrast Mode Support ── */
+@media (forced-colors: active) {
+  .btn-primary {
+    forced-color-adjust: none;
+    background: ButtonText;
+    color: ButtonFace;
+    border: 2px solid ButtonText;
+  }
+
+  .badge,
+  .status-pill,
+  .hub-tag {
+    forced-color-adjust: none;
+    border: 1px solid ButtonText;
+  }
+
+  .card,
+  .panel,
+  .sidebar {
+    border: 1px solid ButtonText;
+  }
+}
+
+/* ── 9. Motion Safety (duplicate guard) ── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* ── 10. Text Scaling Support ── */
+
+/* Support up to 200% text zoom without horizontal scroll */
+@media (min-resolution: 1dppx) {
+  body { overflow-x: hidden; }
+}
+
+/* Fluid font sizes already handled via clamp() in main.css */
+
+/* ── 11. Structured Content Helpers ── */
+
+/* Breadcrumb nav — helps crawlers understand page hierarchy */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.breadcrumb__item { color: var(--color-text-muted); }
+.breadcrumb__item a { color: var(--color-text-secondary); text-decoration: none; }
+.breadcrumb__item a:hover { color: var(--color-accent); }
+.breadcrumb__separator { color: var(--color-text-muted); font-size: 0.75rem; }
+.breadcrumb__item[aria-current="page"] { color: var(--color-text-primary); font-weight: 600; }
+
+/* ── 12. Rich Snippet Helpers ── */
+
+/* Hide schema.org microdata from visual display */
+[itemscope][itemtype] { display: contents; }
+
+/* Visually hidden but crawlable metadata */
+.seo-meta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── 13. Language & Direction ── */
+[lang]:not([lang="en"]) {
+  /* Ensure correct quote marks for non-English content */
+  quotes: auto;
+}
+
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* ── 14. Social Share Preview Helpers ── */
+
+/* OG image placeholder — shown when image fails to load */
+.og-image-fallback {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1200 / 630;
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
