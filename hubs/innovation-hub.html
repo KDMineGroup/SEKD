@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Innovation Hub — SESMine</title>
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{display:flex;min-height:100vh;background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary);}
+    .sidebar{width:240px;flex-shrink:0;background:var(--color-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+    .sidebar__logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--color-border);margin-bottom:16px;text-decoration:none;}
+    .sidebar__logo img{height:28px;} .sidebar__logo-text{font-size:1rem;font-weight:800;color:var(--color-text-primary);letter-spacing:-0.03em;}
+    .sidebar__section-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-muted);padding:12px 20px 6px;}
+    .sidebar__nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;transition:background .15s,color .15s;position:relative;}
+    .sidebar__nav a:hover{background:var(--color-bg-hover);color:var(--color-text-primary);}
+    .sidebar__nav a.active{background:rgba(168,85,247,0.1);color:#a855f7;font-weight:600;}
+    .sidebar__nav a.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#a855f7;border-radius:0 2px 2px 0;}
+    .sidebar__footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--color-border);}
+    .user-cell{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:34px;height:34px;border-radius:50%;background:#a855f7;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;} .user-name{font-size:0.82rem;font-weight:600;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-plan{font-size:0.72rem;color:var(--color-text-muted);}
+    .btn-logout{background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;display:flex;align-items:center;transition:color .15s;}
+    .btn-logout:hover{color:#ef4444;}
+    .main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+    .hub-header{background:linear-gradient(135deg,rgba(168,85,247,0.1) 0%,var(--color-surface) 60%);border-bottom:1px solid var(--color-border);padding:32px;display:flex;align-items:center;gap:20px;}
+    .hub-header__icon{width:56px;height:56px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .hub-header__title{font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;margin:0 0 4px;}
+    .hub-header__desc{font-size:0.875rem;color:var(--color-text-secondary);margin:0;}
+    .hub-header__meta{margin-left:auto;display:flex;gap:20px;flex-shrink:0;}
+    .hub-meta-item{text-align:center;} .hub-meta-item__value{font-size:1.25rem;font-weight:800;color:#a855f7;letter-spacing:-0.02em;}
+    .hub-meta-item__label{font-size:0.72rem;color:var(--color-text-muted);}
+    .hub-tabs{display:flex;gap:0;border-bottom:1px solid var(--color-border);background:var(--color-surface);padding:0 32px;overflow-x:auto;scrollbar-width:none;}
+    .hub-tab{padding:14px 18px;font-size:0.875rem;font-weight:500;color:var(--color-text-muted);border:none;background:none;cursor:pointer;font-family:var(--font-body);border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;}
+    .hub-tab:hover{color:var(--color-text-primary);}
+    .hub-tab.active{color:#a855f7;border-bottom-color:#a855f7;font-weight:600;}
+    .page-body{padding:32px;flex:1;}
+    .tab-panel{display:none;} .tab-panel.active{display:block;animation:fadeIn 0.25s ease both;}
+    .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;animation:fadeInUp 0.4s ease both;margin-bottom:24px;}
+    .panel__header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--color-border);}
+    .panel__title{font-size:0.9rem;font-weight:600;color:var(--color-text-primary);}
+    .panel__body{padding:20px;}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+    @media(max-width:1000px){.grid-3{grid-template-columns:1fr 1fr;}}
+    @media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+    .tech-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both;transition:box-shadow .2s,transform .2s;}
+    .tech-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+    .tech-card__tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
+    .tech-card__tag.emerging{background:rgba(168,85,247,0.12);color:#a855f7;border:1px solid rgba(168,85,247,0.25);}
+    .tech-card__tag.deployed{background:rgba(46,204,113,0.12);color:#2ecc71;border:1px solid rgba(46,204,113,0.25);}
+    .tech-card__tag.pilot{background:rgba(245,166,35,0.12);color:#f5a623;border:1px solid rgba(245,166,35,0.25);}
+    .tech-card__tag.research{background:rgba(59,130,246,0.12);color:#3b82f6;border:1px solid rgba(59,130,246,0.25);}
+    .tech-card__title{font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 6px;}
+    .tech-card__desc{font-size:0.78rem;color:var(--color-text-secondary);line-height:1.5;margin:0 0 14px;}
+    .tech-card__meta{font-size:0.72rem;color:var(--color-text-muted);}
+    .readiness-bar{height:4px;background:var(--color-bg-deep);border-radius:2px;overflow:hidden;margin-top:8px;}
+    .readiness-fill{height:100%;border-radius:2px;background:#a855f7;}
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{padding:10px 14px;font-size:0.72rem;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.07em;background:var(--color-bg-deep);border-bottom:1px solid var(--color-border);text-align:left;}
+    .data-table td{padding:12px 14px;font-size:0.85rem;color:var(--color-text-secondary);border-bottom:1px solid var(--color-border);}
+    .data-table tr:last-child td{border-bottom:none;}
+    .data-table tr:hover td{background:var(--color-bg-hover);}
+    .data-table td:first-child{font-weight:600;color:var(--color-text-primary);}
+  </style>
+</head>
+<body>
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+    <a href="/index.html" class="sidebar__logo"><img src="/assets/img/logo.svg" alt="SESMine"/><span class="sidebar__logo-text">SESMine</span></a>
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/dashboard/main-dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Dashboard</a>
+    </nav>
+    <p class="sidebar__section-label">Hubs</p>
+    <nav class="sidebar__nav">
+      <a href="/hubs/economics-hub.html"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#f5a623"/></svg>Economics</a>
+      <a href="/hubs/engineering-hub.html"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#6366f1"/></svg>Engineering</a>
+      <a href="/hubs/procurement-hub.html"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#14b8a6"/></svg>Procurement</a>
+      <a href="/hubs/safety-hub.html"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#ef4444"/></svg>Safety</a>
+      <a href="/hubs/sustainability-hub.html"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#2ecc71"/></svg>Sustainability</a>
+      <a href="/hubs/innovation-hub.html" class="active" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#a855f7"/></svg>Innovation</a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="user-cell">
+        <div class="user-avatar" data-user-avatar>JW</div>
+        <div class="user-info"><div class="user-name" data-user-name>Loading…</div><div class="user-plan" data-user-plan>Pro</div></div>
+        <button class="btn-logout" onclick="SESMineAuth.logout()" aria-label="Sign out"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="hub-header" role="banner">
+      <div class="hub-header__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="hub-header__title">Innovation Hub</h1>
+        <p class="hub-header__desc">Emerging technologies, automation trends, R&D pipeline & mining technology intelligence</p>
+      </div>
+      <div class="hub-header__meta" aria-label="Hub statistics">
+        <div class="hub-meta-item"><div class="hub-meta-item__value">24</div><div class="hub-meta-item__label">Tech initiatives</div></div>
+        <div class="hub-meta-item"><div class="hub-meta-item__value">6</div><div class="hub-meta-item__label">Active pilots</div></div>
+        <div class="hub-meta-item"><div class="hub-meta-item__value">$28M</div><div class="hub-meta-item__label">R&D investment</div></div>
+      </div>
+    </header>
+
+    <nav class="hub-tabs" role="tablist" aria-label="Innovation Hub sections">
+      <button class="hub-tab active" role="tab" aria-selected="true"  aria-controls="tab-tech"      id="btn-tech"      onclick="switchTab('tech',this)">Technology Radar</button>
+      <button class="hub-tab"        role="tab" aria-selected="false" aria-controls="tab-automation" id="btn-automation" onclick="switchTab('automation',this)">Automation</button>
+      <button class="hub-tab"        role="tab" aria-selected="false" aria-controls="tab-rd"         id="btn-rd"         onclick="switchTab('rd',this)">R&D Pipeline</button>
+      <button class="hub-tab"        role="tab" aria-selected="false" aria-controls="tab-trends"     id="btn-trends"     onclick="switchTab('trends',this)">Industry Trends</button>
+    </nav>
+
+    <main class="page-body" role="main">
+
+      <!-- TAB: Technology Radar -->
+      <div id="tab-tech" class="tab-panel active" role="tabpanel" aria-labelledby="btn-tech">
+        <div class="grid-3">
+          <div class="tech-card" style="animation-delay:0.05s">
+            <span class="tech-card__tag deployed">Deployed</span>
+            <h3 class="tech-card__title">Autonomous Haul Trucks (AHS)</h3>
+            <p class="tech-card__desc">Fleet of 8 Komatsu 930E-5 AHS operating in Pilbara. 18% productivity gain, zero LTIs since deployment.</p>
+            <div class="tech-card__meta">Technology Readiness: 9/9</div>
+            <div class="readiness-bar"><div class="readiness-fill" style="width:100%;background:#2ecc71"></div></div>
+          </div>
+          <div class="tech-card" style="animation-delay:0.1s">
+            <span class="tech-card__tag deployed">Deployed</span>
+            <h3 class="tech-card__title">Predictive Maintenance (ML)</h3>
+            <p class="tech-card__desc">Machine learning models predicting equipment failures 72h in advance. 34% reduction in unplanned downtime.</p>
+            <div class="tech-card__meta">Technology Readiness: 8/9</div>
+            <div class="readiness-bar"><div class="readiness-fill" style="width:89%;background:#2ecc71"></div></div>
+          </div>
+          <div class="tech-card" style="animation-delay:0.15s">
+            <span class="tech-card__tag pilot">Pilot</span>
+            <h3 class="tech-card__title">Underground Autonomous LHDs</h3>
+            <p class="tech-card__desc">Sandvik AutoMine trial at Kalgoorlie — 2 units operating in remote-supervised mode. Results Q3 2026.</p>
+            <div class="tech-card__meta">Technology Readiness: 7/9</div>
+            <div class="readiness-bar"><div class="readiness-fill" style="width:78%"></div></div>
+          </div>
+          <div class="tech-card" style="animation-delay:0.2s">
+            <span class="tech-card__tag pilot">Pilot</span>
+            <h3 class="tech-card__title">Drone Surveying & Mapping</h3>
+            <p class="tech-card__desc">DJI Zenmuse L2 LiDAR drones replacing traditional survey crews. 80% time saving on pit volume calculations.</p>
+            <div class="tech-card__meta">Technology Readiness: 8/9</div>
+            <div class="readiness-bar"><div class="readiness-fill" style="width:89%;background:#f5a623"></div></div>
+          </div>
+          <div class="tech-card" style="animation-delay:0.25s">
+            <span class="tech-card__tag emerging">Emerging</span>
+            <h3 class="tech-card__title">Digital Twin — Pit Optimisation</h3>
+            <p class="tech-card__desc">Real-time 3D digital twin of open pit operations enabling dynamic blast pattern and scheduling optimisation.</p>
+            <div class="tech-card__meta">Technology Readiness: 5/9</div>
+            <div class="readiness-bar"><div class="readiness-fill" style="width:56%"></div></div>
+          </div>
+          <div class="tech-card" style="animation-delay:0.3s">
+            <span class="tech-card__tag research">Research</span>
+            <h3 class="tech-card__title">Battery Electric Haul Trucks</h3>
+            <p class="tech-card__desc">Evaluating Epiroc MT65 and Sandvik TH665B battery-electric trucks for underground application. Feasibility 2027.</p>
+            <div class="tech-card__meta">Technology Readiness: 4/9</div>
+            <div class="readiness-bar"><div class="readiness-fill" style="width:44%;background:#3b82f6"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Automation -->
+      <div id="tab-automation" class="tab-panel" role="tabpanel" aria-labelledby="btn-automation">
+        <div class="panel">
+          <div class="panel__header"><span class="panel__title">Automation Initiative Tracker</span></div>
+          <div class="panel__body" style="padding:0">
+            <table class="data-table" aria-label="Automation initiatives">
+              <thead>
+                <tr><th scope="col">Initiative</th><th scope="col">Technology</th><th scope="col">Stage</th><th scope="col">ROI</th><th scope="col">Savings/yr</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Autonomous Haulage System</td>
+                  <td style="color:var(--color-text-muted)">Komatsu AHS FrontRunner</td>
+                  <td style="color:#2ecc71;font-weight:600">Operational</td>
+                  <td style="font-weight:700;color:#2ecc71">284%</td>
+                  <td style="font-weight:700;color:var(--color-text-primary)">$14.2M</td>
+                </tr>
+                <tr>
+                  <td>Predictive Maintenance AI</td>
+                  <td style="color:var(--color-text-muted)">SESMine AI Predictor</td>
+                  <td style="color:#2ecc71;font-weight:600">Operational</td>
+                  <td style="font-weight:700;color:#2ecc71">196%</td>
+                  <td style="font-weight:700;color:var(--color-text-primary)">$8.4M</td>
+                </tr>
+                <tr>
+                  <td>Automated Drill Rigs</td>
+                  <td style="color:var(--color-text-muted)">Epiroc Pit Viper 351</td>
+                  <td style="color:#f5a623;font-weight:600">Pilot (2 units)</td>
+                  <td style="font-weight:700;color:#f5a623">Est. 142%</td>
+                  <td style="font-weight:700;color:var(--color-text-primary)">$3.8M</td>
+                </tr>
+                <tr>
+                  <td>Remote Operations Centre</td>
+                  <td style="color:var(--color-text-muted)">Hexagon MineMeld</td>
+                  <td style="color:#f5a623;font-weight:600">Implementation</td>
+                  <td style="font-weight:700;color:#f5a623">Est. 88%</td>
+                  <td style="font-weight:700;color:var(--color-text-primary)">$6.1M</td>
+                </tr>
+                <tr>
+                  <td>Automated Sampling System</td>
+                  <td style="color:var(--color-text-muted)">FLSmidth AutoSampler</td>
+                  <td style="color:#a855f7;font-weight:600">Evaluation</td>
+                  <td style="font-weight:700;color:#a855f7">TBD</td>
+                  <td style="font-weight:700;color:var(--color-text-muted)">Est. $1.2M</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: R&D Pipeline -->
+      <div id="tab-rd" class="tab-panel" role="tabpanel" aria-labelledby="btn-rd">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__header"><span class="panel__title">Active R&D Projects</span></div>
+            <div class="panel__body">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="padding:14px;background:var(--color-bg-deep);border:1px solid var(--color-border);border-radius:var(--radius-md)">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+                    <span style="font-size:0.875rem;font-weight:700;color:var(--color-text-primary)">In-Pit Crushing & Conveying (IPCC)</span>
+                    <span style="font-size:0.72rem;font-weight:700;color:#a855f7;background:rgba(168,85,247,0.1);padding:2px 8px;border-radius:999px;border:1px solid rgba(168,85,247,0.2)">Year 2 of 3</span>
+                  </div>
+                  <p style="font-size:0.78rem                  ;color:var(--color-text-secondary);margin:0 0 8px;line-height:1.5">Evaluating semi-mobile IPCC system to replace 4 haul trucks, targeting $18M/yr OPEX reduction.</p>
+                  <div style="font-size:0.75rem;color:var(--color-text-muted)">Budget: $4.2M · Lead: Dr. S. Nguyen · Partner: Thyssenkrupp</div>
+                </div>
+                <div style="padding:14px;background:var(--color-bg-deep);border:1px solid var(--color-border);border-radius:var(--radius-md)">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+                    <span style="font-size:0.875rem;font-weight:700;color:var(--color-text-primary)">Geometallurgical Modelling AI</span>
+                    <span style="font-size:0.72rem;font-weight:700;color:#f5a623;background:rgba(245,166,35,0.1);padding:2px 8px;border-radius:999px;border:1px solid rgba(245,166,35,0.2)">Year 1 of 2</span>
+                  </div>
+                  <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 8px;line-height:1.5">ML model predicting ore hardness and recovery from drill core XRF data. Targeting 3% recovery improvement.</p>
+                  <div style="font-size:0.75rem;color:var(--color-text-muted)">Budget: $2.8M · Lead: A. Chen · Partner: CSIRO</div>
+                </div>
+                <div style="padding:14px;background:var(--color-bg-deep);border:1px solid var(--color-border);border-radius:var(--radius-md)">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+                    <span style="font-size:0.875rem;font-weight:700;color:var(--color-text-primary)">Hydrogen-Ready Haul Fleet Study</span>
+                    <span style="font-size:0.72rem;font-weight:700;color:#3b82f6;background:rgba(59,130,246,0.1);padding:2px 8px;border-radius:999px;border:1px solid rgba(59,130,246,0.2)">Scoping</span>
+                  </div>
+                  <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 8px;line-height:1.5">Feasibility study for hydrogen fuel cell haul trucks. Aligned with 2035 net-zero target pathway.</p>
+                  <div style="font-size:0.75rem;color:var(--color-text-muted)">Budget: $0.8M · Lead: R. Patel · Partner: Anglo American</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__header"><span class="panel__title">R&D Investment Summary</span></div>
+            <div class="panel__body">
+              <div style="text-align:center;padding:16px 0 20px">
+                <div style="font-size:2.5rem;font-weight:900;color:#a855f7;letter-spacing:-0.04em;line-height:1">$28M</div>
+                <div style="font-size:0.875rem;color:var(--color-text-secondary);margin-top:6px">Total R&D investment — FY2026</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px"><span style="color:var(--color-text-secondary)">Automation & Robotics</span><span style="font-weight:700;color:var(--color-text-primary)">$12.4M (44%)</span></div>
+                  <div style="height:6px;background:var(--color-bg-deep);border-radius:3px;overflow:hidden"><div style="height:100%;width:44%;background:#a855f7;border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px"><span style="color:var(--color-text-secondary)">Decarbonisation</span><span style="font-weight:700;color:var(--color-text-primary)">$8.2M (29%)</span></div>
+                  <div style="height:6px;background:var(--color-bg-deep);border-radius:3px;overflow:hidden"><div style="height:100%;width:29%;background:#2ecc71;border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px"><span style="color:var(--color-text-secondary)">AI & Data Science</span><span style="font-weight:700;color:var(--color-text-primary)">$5.6M (20%)</span></div>
+                  <div style="height:6px;background:var(--color-bg-deep);border-radius:3px;overflow:hidden"><div style="height:100%;width:20%;background:#3b82f6;border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px"><span style="color:var(--color-text-secondary)">Process Innovation</span><span style="font-weight:700;color:var(--color-text-primary)">$1.8M (7%)</span></div>
+                  <div style="height:6px;background:var(--color-bg-deep);border-radius:3px;overflow:hidden"><div style="height:100%;width:7%;background:#f5a623;border-radius:3px"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Industry Trends -->
+      <div id="tab-trends" class="tab-panel" role="tabpanel" aria-labelledby="btn-trends">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+          <article style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both">
+            <div style="font-size:0.72rem;font-weight:700;color:#a855f7;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Automation</div>
+            <h3 style="font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 8px">Autonomous Mining Reaches Inflection Point</h3>
+            <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 14px;line-height:1.5">Over 800 autonomous haul trucks now operating globally. Rio Tinto's Gudai-Darri mine achieves 15% higher productivity vs conventional operations.</p>
+            <div style="font-size:0.72rem;color:var(--color-text-muted)">SESMine Intelligence · Jul 2026</div>
+          </article>
+          <article style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both;animation-delay:0.05s">
+            <div style="font-size:0.72rem;font-weight:700;color:#2ecc71;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Decarbonisation</div>
+            <h3 style="font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 8px">Green Hydrogen Pilot at Fortescue Reaches Commercial Scale</h3>
+            <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 14px;line-height:1.5">Fortescue's Christmas Creek green hydrogen haul truck trial demonstrates 40% emission reduction. Technology cost expected to halve by 2028.</p>
+            <div style="font-size:0.72rem;color:var(--color-text-muted)">SESMine Intelligence · Jun 2026</div>
+          </article>
+          <article style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both;animation-delay:0.1s">
+            <div style="font-size:0.72rem;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">AI & Data</div>
+            <h3 style="font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 8px">Generative AI Transforms Mine Planning Workflows</h3>
+            <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 14px;line-height:1.5">Major miners deploying LLM-assisted mine planning tools, reducing schedule optimisation time from weeks to hours. BHP pilots Gemini integration.</p>
+            <div style="font-size:0.72rem;color:var(--color-text-muted)">SESMine Intelligence · Jul 2026</div>
+          </article>
+          <article style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both;animation-delay:0.15s">
+            <div style="font-size:0.72rem;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Battery Metals</div>
+            <h3 style="font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 8px">Direct Lithium Extraction Threatens Conventional Mining</h3>
+            <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 14px;line-height:1.5">DLE technology achieving 90%+ lithium recovery from brines at 60% lower cost than hard rock mining. Albemarle and SQM scaling commercial plants.</p>
+            <div style="font-size:0.72rem;color:var(--color-text-muted)">SESMine Intelligence · Jun 2026</div>
+          </article>
+          <article style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both;animation-delay:0.2s">
+            <div style="font-size:0.72rem;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Safety Tech</div>
+            <h3 style="font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 8px">Computer Vision Eliminates Fatigue-Related Incidents</h3>
+            <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 14px;line-height:1.5">Seeing Machines Guardian system deployed across 12,000 mining vehicles globally. 94% reduction in fatigue-related near misses reported by early adopters.</p>
+            <div style="font-size:0.72rem;color:var(--color-text-muted)">SESMine Intelligence · Jul 2026</div>
+          </article>
+          <article style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both;animation-delay:0.25s">
+            <div style="font-size:0.72rem;font-weight:700;color:#14b8a6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Digital Infrastructure</div>
+            <h3 style="font-size:0.9rem;font-weight:700;color:var(--color-text-primary);margin:0 0 8px">Private 5G Networks Become Standard at Tier-1 Mines</h3>
+            <p style="font-size:0.78rem;color:var(--color-text-secondary);margin:0 0 14px;line-height:1.5">Underground 5G deployment enabling real-time telemetry from 10,000+ sensors per mine. Latency below 5ms enabling true remote equipment control.</p>
+            <div style="font-size:0.72rem;color:var(--color-text-muted)">SESMine Intelligence · Jun 2026</div>
+          </article>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    SESMineAuth.requireAuth();
+    function switchTab(id,btn){
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.hub-tab').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');});
+      document.getElementById('tab-'+id).classList.add('active');
+      btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    }
+  </script>
+  <script src="/assets/js/meta-injector.js" defer></script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>
+
