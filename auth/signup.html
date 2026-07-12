@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — SESMine</title>
+  <meta name="description" content="Join 1,200+ mining professionals on SESMine. Create your free account and get instant access to mining intelligence tools." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--color-bg-deep);
+      font-family: var(--font-body);
+    }
+
+    @media (max-width: 900px) {
+      body { grid-template-columns: 1fr; }
+      .auth-panel { display: none; }
+    }
+
+    .auth-form-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+      text-decoration: none;
+    }
+
+    .auth-logo img { height: 30px; }
+
+    .auth-logo__text {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      letter-spacing: -0.03em;
+    }
+
+    .auth-card h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      letter-spacing: -0.03em;
+      margin: 0 0 6px;
+    }
+
+    .auth-card__subtitle {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin: 0 0 28px;
+    }
+
+    .auth-card__subtitle a {
+      color: var(--color-accent);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin-bottom: 7px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      font-family: var(--font-body);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+      appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.15);
+    }
+
+    .form-group input.error { border-color: var(--color-danger); }
+    .form-group input::placeholder { color: var(--color-text-muted); }
+
+    .input-wrapper { position: relative; }
+    .input-wrapper input { padding-right: 44px; }
+    .toggle-pw {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--color-text-muted);
+      padding: 4px; display: flex; align-items: center; transition: color 0.15s;
+    }
+    .toggle-pw:hover { color: var(--color-text-primary); }
+
+    .field-error { font-size: 0.78rem; color: var(--color-danger); margin-top: 4px; display: none; }
+    .field-error.visible { display: block; animation: fadeInDown 0.2s ease both; }
+
+    /* Password strength */
+    .pw-strength {
+      margin-top: 8px;
+    }
+
+    .pw-strength__bar {
+      height: 4px;
+      background: var(--color-border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .pw-strength__fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s ease, background 0.3s ease;
+      width: 0%;
+    }
+
+    .pw-strength__label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Plan selector */
+    .plan-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .plan-option {
+      position: relative;
+    }
+
+    .plan-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .plan-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      text-align: center;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .plan-option input:checked + label {
+      border-color: var(--color-accent);
+      background: rgba(245,166,35,0.08);
+    }
+
+    .plan-option label:hover {
+      border-color: var(--color-border-strong);
+    }
+
+    .plan-option__name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 2px;
+    }
+
+    .plan-option__price {
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+    }
+
+    .terms-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 20px;
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+    }
+
+    .terms-check input[type="checkbox"] {
+      width: auto;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .terms-check a { color: var(--color-accent); font-weight: 600; text-decoration: none; }
+    .terms-check a:hover { text-decoration: underline; }
+
+    .btn-signup {
+      width: 100%;
+      padding: 13px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-signup:hover { background: var(--color-accent-dark); box-shadow: 0 4px 16px rgba(245,166,35,0.3); }
+    .btn-signup:active { transform: scale(0.98); }
+    .btn-signup:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-signup .spinner {
+      display: none; width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .btn-signup.loading .btn-text { display: none; }
+    .btn-signup.loading .spinner  { display: block; }
+
+    .alert { display:none; padding:12px 14px; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:16px; font-weight:500; }
+    .alert--error   { background:rgba(239,68,68,0.1);  border:1px solid rgba(239,68,68,0.3);  color:#ef4444; }
+    .alert--success { background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); color:#2ecc71; }
+    .alert.visible  { display:block; animation:fadeInDown 0.25s ease both; }
+
+    .auth-footer { margin-top:20px; text-align:center; font-size:0.82rem; color:var(--color-text-muted); }
+    .auth-footer a { color:var(--color-accent); font-weight:600; text-decoration:none; }
+    .auth-footer a:hover { text-decoration:underline; }
+
+    /* Right panel */
+    .auth-panel {
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-panel::before {
+      content: '';
+      position: absolute;
+      bottom: -200px; left: -200px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,166,35,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .feature-list { list-style: none; padding: 0; width: 100%; max-width: 360px; margin-bottom: 32px; }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .feature-item:last-child { border-bottom: none; }
+
+    .feature-item__icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(245,166,35,0.1);
+    }
+
+    .feature-item__title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 2px;
+    }
+
+    .feature-item__desc {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+
+    .trial-note {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      text-align: center;
+      max-width: 320px;
+    }
+
+    .trial-note strong { color: var(--color-accent); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- ══ FORM SIDE ══ -->
+  <div class="auth-form-side">
+    <div class="auth-card animate-fade-in-up">
+
+      <a href="/index.html" class="auth-logo" aria-label="SESMine home">
+        <img src="/assets/img/logo.svg" alt="SESMine logo" />
+        <span class="auth-logo__text">SESMine</span>
+      </a>
+
+      <h1>Start your free trial</h1>
+      <p class="auth-card__subtitle">
+        Already have an account? <a href="/auth/login.html">Sign in</a>
+      </p>
+
+      <div id="alert" class="alert" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+      <form id="signupForm" novalidate>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="James" required autocomplete="given-name" />
+            <span id="firstName-error" class="field-error" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Wilson" required autocomplete="family-name" />
+            <span id="lastName-error" class="field-error" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Work Email</label>
+          <input type="email" id="email" name="email" placeholder="you@company.com" required autocomplete="email" aria-describedby="email-error" />
+          <span id="email-error" class="field-error" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="organisation">Organisation</label>
+          <input type="text" id="organisation" name="organisation" placeholder="e.g. Rio Tinto" required autocomplete="organization" aria-describedby="org-error" />
+          <span id="org-error" class="field-error" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Your Role</label>
+          <select id="role" name="role" required aria-describedby="role-error">
+            <option value="" disabled selected>Select your role…</option>
+            <option value="engineer">Mining Engineer</option>
+            <option value="geologist">Geologist</option>
+            <option value="procurement">Procurement Manager</option>
+            <option value="finance">Finance / Economics</option>
+            <option value="safety">Safety & Compliance</option>
+            <option value="esg">ESG / Sustainability</option>
+            <option value="executive">Executive / Director</option>
+            <option value="other">Other</option>
+          </select>
+          <span id="role-error" class="field-error"          role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password"
+              placeholder="Create a strong password"
+              required autocomplete="new-password"
+              aria-describedby="password-error"
+              oninput="checkStrength(this.value)" />
+            <button type="button" class="toggle-pw"
+              aria-label="Show password" aria-pressed="false"
+              onclick="togglePw(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="pw-strength" id="pwStrength" aria-live="polite">
+            <div class="pw-strength__bar">
+              <div class="pw-strength__fill" id="pwFill"></div>
+            </div>
+            <span class="pw-strength__label" id="pwLabel"></span>
+          </div>
+          <span id="password-error" class="field-error" role="alert"></span>
+        </div>
+
+        <!-- Plan selector -->
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:0.8rem;font-weight:600;color:var(--color-text-secondary);margin-bottom:10px">
+            Choose Your Plan
+          </label>
+          <div class="plan-selector" role="radiogroup" aria-label="Select plan">
+            <div class="plan-option">
+              <input type="radio" id="planFree" name="plan" value="free" checked />
+              <label for="planFree">
+                <span class="plan-option__name">Free</span>
+                <span class="plan-option__price">$0/mo</span>
+              </label>
+            </div>
+            <div class="plan-option">
+              <input type="radio" id="planPro" name="plan" value="pro" />
+              <label for="planPro">
+                <span class="plan-option__name">Pro</span>
+                <span class="plan-option__price">$149/mo</span>
+              </label>
+            </div>
+            <div class="plan-option">
+              <input type="radio" id="planEnterprise" name="plan" value="enterprise" />
+              <label for="planEnterprise">
+                <span class="plan-option__name">Enterprise</span>
+                <span class="plan-option__price">Custom</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="terms-check">
+          <input type="checkbox" id="terms" name="terms" required
+            aria-required="true" aria-describedby="terms-error" />
+          <label for="terms" style="font-weight:400;margin:0;cursor:pointer">
+            I agree to the
+            <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a>
+            and
+            <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+          </label>
+        </div>
+        <span id="terms-error" class="field-error" role="alert"></span>
+
+        <button type="submit" class="btn-signup" id="signupBtn">
+          <span class="btn-text">Create Free Account</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="/auth/login.html">Sign in</a></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ VISUAL PANEL ══ -->
+  <aside class="auth-panel" aria-hidden="true">
+    <ul class="feature-list stagger-children">
+      <li class="feature-item">
+        <div class="feature-item__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+            viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-item__title">AI-Powered Forecasting</div>
+          <div class="feature-item__desc">CAPEX predictions with ±3.2% variance accuracy using ML trained on global mining data.</div>
+        </div>
+      </li>
+      <li class="feature-item">
+        <div class="feature-item__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+            viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-item__title">Real-Time ESG Reporting</div>
+          <div class="feature-item__desc">Monitor carbon footprint, social impact, and governance scores aligned with GRI and TCFD.</div>
+        </div>
+      </li>
+      <li class="feature-item">
+        <div class="feature-item__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+            viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-item__title">Six Specialist Hubs</div>
+          <div class="feature-item__desc">Economics, Engineering, Procurement, Safety, Sustainability, and Innovation — all in one platform.</div>
+        </div>
+      </li>
+      <li class="feature-item">
+        <div class="feature-item__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+            viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="feature-item__title">Enterprise Security</div>
+          <div class="feature-item__desc">SOC 2 Type II certified. ISO 27001 compliant. 256-bit TLS encryption. 99.9% uptime SLA.</div>
+        </div>
+      </li>
+    </ul>
+
+    <p class="trial-note">
+      <strong>14-day free trial</strong> — no credit card required.<br/>
+      Cancel anytime. Upgrade or downgrade at will.
+    </p>
+  </aside>
+
+  <script src="/js/config.js"></script>
+  <script>
+    /* ── Password visibility ── */
+    function togglePw(btn) {
+      const input = document.getElementById('password');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(isHidden));
+      btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    }
+
+    /* ── Password strength ── */
+    function checkStrength(val) {
+      const fill  = document.getElementById('pwFill');
+      const label = document.getElementById('pwLabel');
+      let score = 0;
+      if (val.length >= 8)  score++;
+      if (val.length >= 12) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      const levels = [
+        { pct:'0%',   color:'transparent', text:'' },
+        { pct:'20%',  color:'#ef4444',     text:'Very weak' },
+        { pct:'40%',  color:'#f59e0b',     text:'Weak' },
+        { pct:'60%',  color:'#f5a623',     text:'Fair' },
+        { pct:'80%',  color:'#3b82f6',     text:'Good' },
+        { pct:'100%', color:'#2ecc71',     text:'Strong' },
+      ];
+
+      const level = levels[Math.min(score, 5)];
+      fill.style.width      = level.pct;
+      fill.style.background = level.color;
+      label.textContent     = level.text;
+      label.style.color     = level.color;
+    }
+
+    /* ── Alert helpers ── */
+    function showAlert(msg, type = 'error') {
+      const el = document.getElementById('alert');
+      el.textContent = msg;
+      el.className = `alert alert--${type} visible`;
+    }
+
+    function hideAlert() {
+      const el = document.getElementById('alert');
+      el.className = 'alert';
+    }
+
+    function showFieldError(id, msg) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = msg; el.classList.add('visible'); }
+    }
+
+    function clearErrors() {
+      hideAlert();
+      document.querySelectorAll('.field-error').forEach(e => {
+        e.textContent = ''; e.classList.remove('visible');
+      });
+      document.querySelectorAll('input.error').forEach(e => e.classList.remove('error'));
+    }
+
+    /* ── Validation ── */
+    function validate(data) {
+      let valid = true;
+      if (!data.firstName.trim()) { showFieldError('firstName-error', 'First name is required.'); valid = false; }
+      if (!data.lastName.trim())  { showFieldError('lastName-error',  'Last name is required.');  valid = false; }
+      if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        showFieldError('email-error', 'Please enter a valid work email.'); valid = false;
+      }
+      if (!data.organisation.trim()) { showFieldError('org-error', 'Organisation is required.'); valid = false; }
+      if (!data.role) { showFieldError('role-error', 'Please select your role.'); valid = false; }
+      if (!data.password || data.password.length < 8) {
+        showFieldError('password-error', 'Password must be at least 8 characters.'); valid = false;
+      }
+      if (!data.terms) { showFieldError('terms-error', 'You must accept the Terms of Service.'); valid = false; }
+      return valid;
+    }
+
+    /* ── Form submission ── */
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const data = {
+        firstName:    document.getElementById('firstName').value,
+        lastName:     document.getElementById('lastName').value,
+        email:        document.getElementById('email').value.trim(),
+        organisation: document.getElementById('organisation').value.trim(),
+        role:         document.getElementById('role').value,
+        password:     document.getElementById('password').value,
+        plan:         document.querySelector('input[name="plan"]:checked')?.value || 'free',
+        terms:        document.getElementById('terms').checked,
+      };
+
+      if (!validate(data)) return;
+
+      const btn = document.getElementById('signupBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          showAlert(result.message || 'Registration failed. Please try again.');
+          return;
+        }
+
+        showAlert('Account created! Redirecting to your dashboard…', 'success');
+        setTimeout(() => {
+          window.location.href = result.redirect || '/dashboard/main-dashboard.html';
+        }, 1000);
+
+      } catch (_) {
+        showAlert('Network error. Please check your connection and try again.');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+      }
+    });
+
+    document.querySelectorAll('#signupForm input, #signupForm select').forEach(el => {
+      el.addEventListener('input', clearErrors);
+    });
+  </script>
+
+  <script src="/assets/js/meta-injector.js" defer></script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>
+
