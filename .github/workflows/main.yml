@@ -1,0 +1,227 @@
+# ─────────────────────────────────────────────────────────────
+#  SESMine — CI/CD Pipeline
+#  Runs on every push to main and on pull requests.
+#  Deploys to GitHub Pages on successful main-branch push.
+# ─────────────────────────────────────────────────────────────
+
+name: SESMine CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages:    write
+  id-token: write
+
+concurrency:
+  group:              "pages"
+  cancel-in-progress: true
+
+jobs:
+
+  # ── 1. Lint & validate ──────────────────────────────────────
+  lint:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint HTML files
+        run: npx htmlhint "**/*.html" --config .htmlhintrc
+        continue-on-error: true
+
+      - name: Lint CSS files
+        run: npx stylelint "assets/css/**/*.css" --config .stylelintrc.json
+        continue-on-error: true
+
+      - name: Lint JavaScript files
+        run: npx eslint "js/**/*.js" "assets/js/**/*.js" --ext .js
+        continue-on-error: true
+
+      - name: Validate JSON files
+        run: |
+          find . -name "*.json" -not -path "*/node_modules/*" | while read f; do
+            python3 -c "import json,sys; json.load(open('$f'))" && echo "✓ $f" || echo "✗ $f INVALID"
+          done
+
+  # ── 2. Security audit ──────────────────────────────────────
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path:   ./
+          base:   ${{ github.event.repository.default_branch }}
+          head:   HEAD
+          extra_args: --only-verified
+        continue-on-error: true
+
+  # ── 3. Build & optimise ────────────────────────────────────
+  build:
+    name: Build & Optimise
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Minify CSS
+        run: |
+          npx clean-css-cli -o assets/css/main.min.css      assets/css/main.css
+          npx clean-css-cli -o assets/css/animations.min.css assets/css/animations.css
+          echo "CSS minification complete."
+
+      - name: Minify JavaScript
+        run: |
+          for f in js/*.js assets/js/*.js; do
+            [ -f "$f" ] || continue
+            out="${f%.js}.min.js"
+            npx terser "$f" -o "$out" --compress --mangle
+            echo "Minified: $f → $out"
+          done
+
+      - name: Optimise images
+        run: |
+          if [ -d "assets/img" ]; then
+            npx imagemin "assets/img/**/*.{png,jpg,jpeg,svg}" --out-dir=assets/img/optimised
+            echo "Image optimisation complete."
+          else
+            echo "No assets/img directory found — skipping."
+          fi
+        continue-on-error: true
+
+      - name: Generate build manifest
+        run: |
+          echo "{" > build-manifest.json
+          echo "  \"buildTime\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"," >> build-manifest.json
+          echo "  \"commit\": \"${{ github.sha }}\"," >> build-manifest.json
+          echo "  \"branch\": \"${{ github.ref_name }}\"," >> build-manifest.json
+          echo "  \"version\": \"$(node -p "require('./package.json').version")\"" >> build-manifest.json
+          echo "}" >> build-manifest.json
+          cat build-manifest.json
+
+      - name: Upload build artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  # ── 4. Accessibility check ─────────────────────────────────
+  accessibility:
+    name: Accessibility Audit
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install axe-cli
+        run: npm install -g @axe-core/cli
+
+      - name: Start local server
+        run: |
+          npx serve . -p 8080 &
+          sleep 3
+          echo "Local server started on port 8080"
+
+      - name: Run accessibility audit — index
+        run: axe http://localhost:8080/index.html --exit
+        continue-on-error: true
+
+      - name: Run accessibility audit — pricing
+        run: axe http://localhost:8080/pricing.html --exit
+        continue-on-error: true
+
+      - name: Run accessibility audit — contact
+        run: axe http://localhost:8080/contact.html --exit
+        continue-on-error: true
+
+  # ── 5. Deploy to GitHub Pages ──────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [ build, security ]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: github-pages
+      url:  ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id:   deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Post deployment summary
+        run: |
+          echo "## ✅ SESMine Deployed Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **URL** | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed at** | $(date -u +%Y-%m-%d\ %H:%M\ UTC) |" >> $GITHUB_STEP_SUMMARY
+
+  # ── 6. Notify on failure ───────────────────────────────────
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [ lint, build, deploy ]
+    if: failure()
+    steps:
+      - name: Post failure summary
+        run: |
+          echo "## ❌ SESMine Pipeline Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "One or more pipeline jobs failed. Please review the logs above." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Author** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
