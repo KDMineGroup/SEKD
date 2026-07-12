@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESG Dashboard — SESMine</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body { display:flex; min-height:100vh; background:var(--color-bg-deep); font-family:var(--font-body); color:var(--color-text-primary); }
+    .sidebar { width:240px; flex-shrink:0; background:var(--color-surface); border-right:1px solid var(--color-border); display:flex; flex-direction:column; padding:24px 0; position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; }
+    .sidebar__logo { display:flex; align-items:center; gap:10px; padding:0 20px 24px; border-bottom:1px solid var(--color-border); margin-bottom:16px; text-decoration:none; }
+    .sidebar__logo img { height:28px; }
+    .sidebar__logo-text { font-size:1rem; font-weight:800; color:var(--color-text-primary); letter-spacing:-0.03em; }
+    .sidebar__section-label { font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-text-muted); padding:12px 20px 6px; }
+    .sidebar__nav a { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:0.875rem; font-weight:500; color:var(--color-text-secondary); text-decoration:none; transition:background .15s,color .15s; position:relative; }
+    .sidebar__nav a:hover { background:var(--color-bg-hover); color:var(--color-text-primary); }
+    .sidebar__nav a.active { background:rgba(245,166,35,0.1); color:var(--color-accent); font-weight:600; }
+    .sidebar__nav a.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--color-accent); border-radius:0 2px 2px 0; }
+    .sidebar__nav a svg { flex-shrink:0; width:16px; height:16px; }
+    .sidebar__footer { margin-top:auto; padding:16px 20px; border-top:1px solid var(--color-border); }
+    .user-cell { display:flex; align-items:center; gap:10px; }
+    .user-avatar { width:34px; height:34px; border-radius:50%; background:var(--color-accent); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .user-info { flex:1; min-width:0; }
+    .user-name { font-size:0.82rem; font-weight:600; color:var(--color-text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .user-plan { font-size:0.72rem; color:var(--color-text-muted); }
+    .btn-logout { background:none; border:none; cursor:pointer; color:var(--color-text-muted); padding:4px; display:flex; align-items:center; border-radius:var(--radius-sm); transition:color .15s; }
+    .btn-logout:hover { color:#ef4444; }
+    .main-content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+    .topbar { height:64px; background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; padding:0 32px; gap:16px; position:sticky; top:0; z-index:50; }
+    .topbar__title { font-size:1rem; font-weight:600; color:var(--color-text-primary); flex:1; }
+    .page-body { padding:32px; flex:1; }
+
+    /* ── ESG Score ring ── */
+    .esg-hero { display:grid; grid-template-columns:auto 1fr; gap:32px; align-items:center; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:32px; margin-bottom:28px; animation:fadeInUp 0.4s ease both; }
+    @media(max-width:700px){ .esg-hero { grid-template-columns:1fr; } }
+
+    .score-ring { position:relative; width:140px; height:140px; flex-shrink:0; }
+    .score-ring svg { transform:rotate(-90deg); }
+    .score-ring__track { fill:none; stroke:var(--color-border); stroke-width:10; }
+    .score-ring__fill  { fill:none; stroke:#2ecc71; stroke-width:10; stroke-linecap:round; stroke-dasharray:377; stroke-dashoffset:68; transition:stroke-dashoffset 1.5s ease; }
+    .score-ring__label { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .score-ring__value { font-size:2rem; font-weight:800; color:var(--color-text-primary); letter-spacing:-0.04em; line-height:1; }
+    .score-ring__sub   { font-size:0.72rem; color:var(--color-text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; }
+
+    .esg-hero__info h2 { font-size:1.25rem; font-weight:700; margin:0 0 6px; }
+    .esg-hero__info p  { font-size:0.875rem; color:var(--color-text-secondary); margin:0 0 20px; max-width:none; }
+    .esg-meta { display:flex; gap:20px; flex-wrap:wrap; }
+    .esg-meta-item { text-align:center; }
+    .esg-meta-item__value { font-size:1.25rem; font-weight:800; color:var(--color-text-primary); letter-spacing:-0.02em; }
+    .esg-meta-item__label { font-size:0.72rem; color:var(--color-text-muted); font-weight:500; }
+
+    /* ── Pillar cards ── */
+    .pillar-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
+    @media(max-width:900px){ .pillar-grid { grid-template-columns:1fr; } }
+
+    .pillar-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:24px; animation:fadeInUp 0.4s ease both; }
+    .pillar-card__header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+    .pillar-card__icon { width:40px; height:40px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .pillar-card__title { font-size:1rem; font-weight:700; color:var(--color-text-primary); }
+    .pillar-card__score { font-size:2rem; font-weight:800; letter-spacing:-0.03em; margin-bottom:8px; }
+    .pillar-card__bar { height:6px; background:var(--color-bg-deep); border-radius:3px; overflow:hidden; margin-bottom:16px; }
+    .pillar-card__bar-fill { height:100%; border-radius:3px; transition:width 1.2s ease; }
+
+    .metric-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
+    .metric-item { display:flex; align-items:center; justify-content:space-between; font-size:0.82rem; }
+    .metric-item__label { color:var(--color-text-secondary); }
+    .metric-item__value { font-weight:600; color:var(--color-text-primary); }
+    .metric-item__trend { font-size:0.72rem; font-weight:600; }
+    .metric-item__trend.up   { color:var(--color-success); }
+    .metric-item__trend.down { color:#ef4444; }
+
+    /* ── Reporting panel ── */
+    .report-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:800px){ .report-grid { grid-template-columns:1fr; } }
+
+    .panel { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); overflow:hidden; animation:fadeInUp 0.4s ease both; }
+    .panel__header { display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--color-border); }
+    .panel__title { font-size:0.9rem; font-weight:600; color:var(--color-text-primary); }
+    .panel__body { padding:20px; }
+
+    .btn-export {
+      display:inline-flex; align-items:center; gap:7px; padding:8px 14px;
+      background:var(--color-accent); color:#fff; border:none; border-radius:var(--radius-md);
+      font-size:0.82rem; font-weight:600; cursor:pointer; font-family:var(--font-body);
+      transition:background .2s; text-decoration:none;
+    }
+    .btn-export:hover { background:var(--color-accent-dark); }
+
+    .framework-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+    .framework-item { display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--color-bg-deep); border-radius:var(--radius-md); border:1px solid var(--color-border); }
+    .framework-item__name { font-size:0.875rem; font-weight:600; color:var(--color-text-primary); }
+    .framework-item__status { font-size:0.75rem; font-weight:600; padding:3px 9px; border-radius:999px; }
+    .framework-item__status.aligned  { background:rgba(46,204,113,0.12); color:#2ecc71; border:1px solid rgba(46,204,113,0.25); }
+    .framework-item__status.partial  { background:rgba(245,166,35,0.12); color:#f5a623; border:1px solid rgba(245,166,35,0.25); }
+    .framework-item__status.pending  { background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25); }
+
+    .target-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px; }
+    .target-item__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-size:0.82rem; }
+    .target-item__name  { font-weight:600; color:var(--color-text-primary); }
+    .target-item__pct   { font-weight:700; color:var(--color-text-primary); }
+    .target-item__bar   { height:6px; background:var(--color-bg-deep); border-radius:3px; overflow:hidden; }
+    .target-item__fill  { height:100%; border-radius:3px; transition:width 1.2s ease; }
+    .target-item__meta  { font-size:0.72rem; color:var(--color-text-muted); margin-top:4px; }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+    <a href="/index.html" class="sidebar__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine" />
+      <span class="sidebar__logo-text">SESMine</span>
+    </a>
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/dashboard/main-dashboard.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+      <a href="/dashboard/analytics.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </a>
+      <a href="/dashboard/esg-dashboard.html" class="active" aria-current="page">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        ESG Dashboard
+      </a>
+    </nav>
+    <p class="sidebar__section-label">Hubs</p>
+    <nav class="sidebar__nav">
+      <a href="/hubs/sustainability-hub.html"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#2ecc71"/></svg>Sustainability</a>
+      <a href="/hubs/economics-hub.html"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#f5a623"/></svg>Economics</a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="user-cell">
+        <div class="user-avatar" data-user-avatar>JW</div>
+        <div class="user-info">
+          <div class="user-name" data-user-name>Loading…</div>
+          <div class="user-plan" data-user-plan>Pro</div>
+        </div>
+        <button class="btn-logout" onclick="SESMineAuth.logout()" aria-label="Sign out">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar" role="banner">
+      <span class="topbar__title">ESG Dashboard</span>
+      <button class="btn-export" onclick="exportESGReport()" aria-label="Export ESG report as PDF">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Export Report
+      </button>
+    
+    </header>
+
+    <main class="page-body" role="main">
+
+      <!-- ESG Hero Score -->
+      <div class="esg-hero" aria-label="Overall ESG performance">
+        <div class="score-ring" role="img" aria-label="ESG score 82 out of 100">
+          <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
+            <circle class="score-ring__track" cx="70" cy="70" r="60"/>
+            <circle class="score-ring__fill" id="scoreRingFill" cx="70" cy="70" r="60"/>
+          </svg>
+          <div class="score-ring__label">
+            <span class="score-ring__value" id="scoreValue">0</span>
+            <span class="score-ring__sub">/ 100</span>
+          </div>
+        </div>
+        <div class="esg-hero__info">
+          <h2>Overall ESG Score — Q2 2026</h2>
+          <p>Your organisation ranks in the <strong>top 15%</strong> of global mining companies. Environmental performance leads, with governance showing the strongest quarter-on-quarter improvement.</p>
+          <div class="esg-meta">
+            <div class="esg-meta-item">
+              <div class="esg-meta-item__value" style="color:#2ecc71">+4</div>
+              <div class="esg-meta-item__label">vs Q1 2026</div>
+            </div>
+            <div class="esg-meta-item">
+              <div class="esg-meta-item__value" style="color:#3b82f6">Top 15%</div>
+              <div class="esg-meta-item__label">Global ranking</div>
+            </div>
+            <div class="esg-meta-item">
+              <div class="esg-meta-item__value" style="color:#f5a623">GRI</div>
+              <div class="esg-meta-item__label">Framework aligned</div>
+            </div>
+            <div class="esg-meta-item">
+              <div class="esg-meta-item__value" style="color:#a855f7">TCFD</div>
+              <div class="esg-meta-item__label">Disclosure ready</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Three Pillars -->
+      <div class="pillar-grid">
+
+        <!-- Environmental -->
+        <div class="pillar-card" style="animation-delay:0.05s">
+          <div class="pillar-card__header">
+            <div class="pillar-card__icon" style="background:rgba(46,204,113,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <span class="pillar-card__title">Environmental</span>
+          </div>
+          <div class="pillar-card__score" style="color:#2ecc71">82</div>
+          <div class="pillar-card__bar">
+            <div class="pillar-card__bar-fill" style="width:82%;background:#2ecc71" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <ul class="metric-list">
+            <li class="metric-item">
+              <span class="metric-item__label">Carbon Emissions (tCO₂e)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">142,800</span>
+                <span class="metric-item__trend up">↓ 8.2%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Water Usage (ML)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">4,210</span>
+                <span class="metric-item__trend up">↓ 3.1%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Waste Diverted (%)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">74%</span>
+                <span class="metric-item__trend up">↑ 5%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Renewable Energy (%)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">38%</span>
+                <span class="metric-item__trend up">↑ 12%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Land Rehabilitated (ha)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">1,240</span>
+                <span class="metric-item__trend up">↑ 18%</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Social -->
+        <div class="pillar-card" style="animation-delay:0.1s">
+          <div class="pillar-card__header">
+            <div class="pillar-card__icon" style="background:rgba(59,130,246,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <span class="pillar-card__title">Social</span>
+          </div>
+          <div class="pillar-card__score" style="color:#3b82f6">76</div>
+          <div class="pillar-card__bar">
+            <div class="pillar-card__bar-fill" style="width:76%;background:#3b82f6" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <ul class="metric-list">
+            <li class="metric-item">
+              <span class="metric-item__label">TRIFR</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">2.1</span>
+                <span class="metric-item__trend up">↓ 16%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Indigenous Employment (%)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">14.2%</span>
+                <span class="metric-item__trend up">↑ 2.1%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Gender Diversity (%)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">32%</span>
+                <span class="metric-item__trend up">↑ 4%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Community Investment ($M)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">$8.4M</span>
+                <span class="metric-item__trend up">↑ 12%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Training Hours / Employee</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">42h</span>
+                <span class="metric-item__trend down">↓ 3h</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Governance -->
+        <div class="pillar-card" style="animation-delay:0.15s">
+          <div class="pillar-card__header">
+            <div class="pillar-card__icon" style="background:rgba(168,85,247,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <span class="pillar-card__title">Governance</span>
+          </div>
+          <div class="pillar-card__score" style="color:#a855f7">88</div>
+          <div class="pillar-card__bar">
+            <div class="pillar-card__bar-fill" style="width:88%;background:#a855f7" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <ul class="metric-list">
+            <li class="metric-item">
+              <span class="metric-item__label">Board Independence (%)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">75%</span>
+                <span class="metric-item__trend up">↑ 8%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Ethics Violations</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">0</span>
+                <span class="metric-item__trend up">↔ No change</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Audit Findings</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">2 minor</span>
+                <span class="metric-item__trend up">↓ 4</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Policy Compliance (%)</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">98.4%</span>
+                <span class="metric-item__trend up">↑ 1.2%</span>
+              </span>
+            </li>
+            <li class="metric-item">
+              <span class="metric-item__label">Whistleblower Reports</span>
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="metric-item__value">3</span>
+                <span class="metric-item__trend up">All resolved</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Frameworks + Targets -->
+      <div class="report-grid">
+
+        <!-- Framework Alignment -->
+        <div class="panel" style="animation-delay:0.2s">
+          <div class="panel__header">
+            <span class="panel__title">Framework Alignment</span>
+          </div>
+          <div class="panel__body">
+            <ul class="framework-list">
+              <li class="framework-item">
+                <span class="framework-item__name">GRI Standards 2021</span>
+                <span class="framework-item__status aligned">Aligned</span>
+              </li>
+              <li class="framework-item">
+                <span class="framework-item__name">TCFD Disclosure</span>
+                <span class="framework-item__status aligned">Aligned</span>
+              </li>
+              <li class="framework-item">
+                <span class="framework-item__name">EU Taxonomy 2027</span>
+                <span class="framework-item__status partial">Partial</span>
+              </li>
+              <li class="framework-item">
+                <span class="framework-item__name">ISSB IFRS S1 / S2</span>
+                <span class="framework-item__status partial">Partial</span>
+              </li>
+              <li class="framework-item">
+                <span class="framework-item__name">UN SDGs (6 of 17)</span>
+                <span class="framework-item__status aligned">Aligned</span>
+              </li>
+              <li class="framework-item">
+                <span class="framework-item__name">ICMM Principles</span>
+                <span class="framework-item__status aligned">Aligned</span>
+              </li>
+              <li class="framework-item">
+                <span class="framework-item__name">CDP Climate Disclosure</span>
+                <span class="framework-item__status pending">Pending</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Targets Progress -->
+        <div class="panel" style="animation-delay:0.25s">
+          <div class="panel__header">
+            <span class="panel__title">2030 Target Progress</span>
+          </div>
+          <div class="panel__body">
+            <ul class="target-list">
+              <li>
+                <div class="target-item__header">
+                  <span class="target-item__name">Net Zero Emissions</span>
+                  <span class="target-item__pct">42%</span>
+                </div>
+                <div class="target-item__bar">
+                  <div class="target-item__fill" style="width:42%;background:#2ecc71"></div>
+                </div>
+                <div class="target-item__meta">Target: 2035 · On track</div>
+              </li>
+              <li>
+                <div class="target-item__header">
+                  <span class="target-item__name">50% Renewable Energy</span>
+                  <span class="target-item__pct">76%</span>
+                </div>
+                <div class="target-item__bar">
+                  <div class="target-item__fill" style="width:76%;background:#3b82f6"></div>
+                </div>
+                <div class="target-item__meta">Target: 2028 · Ahead of schedule</div>
+              </li>
+              <li>
+                <div class="target-item__header">
+                  <span class="target-item__name">Zero Harm (TRIFR &lt; 1.0)</span>
+                  <span class="target-item__pct">58%</span>
+                </div>
+                <div class="target-item__bar">
+                  <div class="target-item__fill" style="width:58%;background:#ef4444"></div>
+                </div>
+                <div class="target-item__meta">Current: 2.1 · Target: 1.0 by 2030</div>
+              </li>
+              <li>
+                <div class="target-item__header">
+                  <span class="target-item__name">40% Women in Leadership</span>
+                  <span class="target-item__pct">80%</span>
+                </div>
+                <div class="target-item__bar">
+                  <div class="target-item__fill" style="width:80%;background:#a855f7"></div>
+                </div>
+                <div class="target-item__meta">Current: 32% · Target: 40% by 2028</div>
+              </li>
+              <li>
+                <div class="target-item__header">
+                  <span class="target-item__name">30% Water Reduction</span>
+                  <span class="target-item__pct">34%</span>
+                </div>
+                <div class="target-item__bar">
+                  <div class="target-item__fill" style="width:34%;background:#14b8a6"></div>
+                </div>
+                <div class="target-item__meta">Reduced 10.2% · Target: 30% by 2030</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    SESMineAuth.requireAuth();
+
+    /* ── Animate score ring on load ── */
+    function animateScoreRing(score) {
+      const circumference = 2 * Math.PI * 60; /* r=60 → ~377 */
+      const fill   = document.getElementById('scoreRingFill');
+      const valEl  = document.getElementById('scoreValue');
+      const offset = circumference - (score / 100) * circumference;
+
+      /* Animate ring */
+      setTimeout(() => {
+        fill.style.strokeDashoffset = offset;
+      }, 300);
+
+      /* Animate number */
+      let current = 0;
+      const step  = score / 60;
+      const timer = setInterval(() => {
+        current = Math.min(current + step, score);
+        valEl.textContent = Math.floor(current);
+        if (current >= score) clearInterval(timer);
+      }, 16);
+    }
+
+    animateScoreRing(82);
+
+    /* ── Export report ── */
+    function exportESGReport() {
+      /* TODO: POST /api/dashboard/esg/export → returns PDF blob */
+      SESMine.showToast('ESG report export started. Your PDF will download shortly.', 'success');
+    }
+  </script>
+  <script src="/assets/js/meta-injector.js" defer></script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>
