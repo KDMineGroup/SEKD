@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipment Database — SESMine</title>
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{display:flex;min-height:100vh;background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary);}
+    .sidebar{width:240px;flex-shrink:0;background:var(--color-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+    .sidebar__logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--color-border);margin-bottom:16px;text-decoration:none;}
+    .sidebar__logo img{height:28px;} .sidebar__logo-text{font-size:1rem;font-weight:800;color:var(--color-text-primary);letter-spacing:-0.03em;}
+    .sidebar__section-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-muted);padding:12px 20px 6px;}
+    .sidebar__nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;transition:background .15s,color .15s;position:relative;}
+    .sidebar__nav a:hover{background:var(--color-bg-hover);color:var(--color-text-primary);}
+    .sidebar__nav a.active{background:rgba(245,166,35,0.1);color:var(--color-accent);font-weight:600;}
+    .sidebar__nav a.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent);border-radius:0 2px 2px 0;}
+    .sidebar__footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--color-border);}
+    .user-cell{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:34px;height:34px;border-radius:50%;background:var(--color-accent);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;} .user-name{font-size:0.82rem;font-weight:600;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-plan{font-size:0.72rem;color:var(--color-text-muted);}
+    .btn-logout{background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;display:flex;align-items:center;transition:color .15s;}
+    .btn-logout:hover{color:#ef4444;}
+    .main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+    .product-header{background:linear-gradient(135deg,rgba(245,166,35,0.1) 0%,var(--color-surface) 60%);border-bottom:1px solid var(--color-border);padding:32px;display:flex;align-items:center;gap:20px;}
+    .product-header__icon{width:56px;height:56px;background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .product-header__title{font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;margin:0 0 4px;}
+    .product-header__desc{font-size:0.875rem;color:var(--color-text-secondary);margin:0;}
+    .product-header__meta{margin-left:auto;display:flex;gap:20px;flex-shrink:0;}
+    .product-meta-item{text-align:center;}
+    .product-meta-item__value{font-size:1.25rem;font-weight:800;color:var(--color-accent);letter-spacing:-0.02em;}
+    .product-meta-item__label{font-size:0.72rem;color:var(--color-text-muted);}
+    .page-body{padding:32px;flex:1;}
+    .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;animation:fadeInUp 0.4s ease both;margin-bottom:24px;}
+    .panel__header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--color-border);}
+    .panel__title{font-size:0.9rem;font-weight:600;color:var(--color-text-primary);}
+    .panel__body{padding:20px;}
+
+    /* ── Filter bar ── */
+    .filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+    .filter-bar input[type="search"]{flex:1;min-width:200px;padding:9px 14px;background:var(--color-bg-input);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-primary);font-size:0.875rem;font-family:var(--font-body);}
+    .filter-bar input[type="search"]:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(245,166,35,0.15);}
+    .filter-bar select{padding:9px 12px;background:var(--color-bg-input);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-primary);font-size:0.875rem;font-family:var(--font-body);}
+    .filter-bar select:focus{outline:none;border-color:var(--color-accent);}
+    .filter-bar button{padding:9px 18px;background:var(--color-accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:0.875rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .2s;}
+    .filter-bar button:hover{background:var(--color-accent-dark);}
+
+    /* ── Equipment grid ── */
+    .equip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+    .equip-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;animation:fadeInUp 0.4s ease both;transition:box-shadow .2s,transform .2s;cursor:pointer;}
+    .equip-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--color-accent);}
+    .equip-card__category{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+    .equip-card__name{font-size:0.95rem;font-weight:700;color:var(--color-text-primary);margin:0 0 4px;}
+    .equip-card__maker{font-size:0.78rem;color:var(--color-text-muted);margin:0 0 12px;}
+    .equip-card__specs{display:flex;flex-direction:column;gap:6px;}
+    .spec-row{display:flex;justify-content:space-between;font-size:0.78rem;}
+    .spec-row__label{color:var(--color-text-muted);}
+    .spec-row__value{font-weight:600;color:var(--color-text-primary);}
+    .equip-card__footer{margin-top:14px;padding-top:12px;border-top:1px solid var(--color-border);display:flex;justify-content:space-between;align-items:center;}
+    .equip-card__price{font-size:0.875rem;font-weight:800;color:var(--color-accent);}
+    .equip-card__btn{font-size:0.75rem;color:var(--color-accent);background:none;border:none;cursor:pointer;font-weight:600;font-family:var(--font-body);}
+
+    /* ── Category colour coding ── */
+    .cat-haul{color:#f5a623;} .cat-drill{color:#6366f1;} .cat-load{color:#14b8a6;}
+    .cat-process{color:#2ecc71;} .cat-support{color:#3b82f6;} .cat-ug{color:#a855f7;}
+
+    /* ── Comparison panel ── */
+    .compare-bar{position:fixed;bottom:0;left:240px;right:0;background:var(--color-surface);border-top:1px solid var(--color-border);padding:12px 32px;display:none;align-items:center;justify-content:space-between;z-index:50;box-shadow:0 -4px 20px rgba(0,0,0,0.15);}
+    .compare-bar.visible{display:flex;}
+    .compare-bar__items{display:flex;gap:10px;align-items:center;}
+    .compare-chip{padding:4px 12px;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.3);border-radius:999px;font-size:0.78rem;font-weight:600;color:var(--color-accent);display:flex;align-items:center;gap:6px;}
+    .compare-chip button{background:none;border:none;cursor:pointer;color:var(--color-text-muted);font-size:0.9rem;line-height:1;padding:0;}
+    .compare-chip button:hover{color:#ef4444;}
+    .btn-compare{padding:9px 20px;background:var(--color-accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:0.875rem;font-weight:700;cursor:pointer;font-family:var(--font-body);}
+    .btn-compare-clear{padding:9px 16px;background:none;color:var(--color-text-muted);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:0.875rem;font-weight:500;cursor:pointer;font-family:var(--font-body);}
+  </style>
+</head>
+<body>
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+    <a href="/index.html" class="sidebar__logo"><img src="/assets/img/logo.svg" alt="SESMine"/><span class="sidebar__logo-text">SESMine</span></a>
+    <p class="sidebar__section-label">Products</p>
+    <nav class="sidebar__nav">
+      <a href="/products/ai-predictor.html"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>AI Predictor</a>
+      <a href="/products/cost-calculator.html"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>Cost Calculator</a>
+      <a href="/products/equipment-database.html" class="active" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>Equipment DB</a>
+    </nav>
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/dashboard/main-dashboard.html"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Dashboard</a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="user-cell">
+        <div class="user-avatar" data-user-avatar>JW</div>
+        <div class="user-info"><div class="user-name" data-user-name>Loading…</div><div class="user-plan" data-user-plan>Pro</div></div>
+        <button class="btn-logout" onclick="SESMineAuth.logout()" aria-label="Sign out"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="product-header" role="banner">
+      <div class="product-header__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
+      </div>
+      <div>
+        <h1 class="product-header__title">Equipment Database</h1>
+        <p class="product-header__desc">Specifications, pricing & comparison for 1,200+ pieces of mining equipment</p>
+      </div>
+      <div class="product-header__meta" aria-label="Database statistics">
+        <div class="product-meta-item"><div class="product-meta-item__value">1,200+</div><div class="product-meta-item__label">Equipment items</div></div>
+        <div class="product-meta-item"><div class="product-meta-item__value">48</div><div class="product-meta-item__label">Manufacturers</div></div>
+        <div class="product-meta-item"><div class="product-meta-item__value">12</div><div class="product-meta-item__label">Categories</div></div>
+      </div>
+    </header>
+
+    <main class="page-body" role="main">
+
+      <!-- Filter bar -->
+      <div class="filter-bar" role="search" aria-label="Equipment search and filters">
+        <input type="search" id="equipSearch" placeholder="Search equipment, model, manufacturer…" aria-label="Search equipment" oninput="filterEquipment()" />
+        <select id="filterCategory" onchange="filterEquipment()" aria-label="Filter by category">
+          <option value="">All Categories</option>
+          <option value="haul">Haul Trucks</option>
+          <option value="drill">Drill Rigs</option>
+          <option value="load">Loading Equipment</option>
+          <option value="process">Processing</option>
+          <option value="ug">Underground</option>
+          <option value="support">Support Equipment</option>
+        </select>
+        <select id="filterMaker" onchange="filterEquipment()" aria-label="Filter by manufacturer">
+          <option value="">All Manufacturers</option>
+          <option value="Caterpillar">Caterpillar</option>
+          <option value="Komatsu">Komatsu</option>
+          <option value="Sandvik">Sandvik</option>
+          <option value="Epiroc">Epiroc</option>
+          <option value="Liebherr">Liebherr</option>
+          <option value="Metso">Metso</option>
+          <option value="FLSmidth">FLSmidth</option>
+        </select>
+        <button onclick="filterEquipment()">Search</button>
+      </div>
+
+      <!-- Equipment grid -->
+      <div class="equip-grid" id="equipGrid" aria-label="Equipment results">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Results count -->
+      <p id="resultsCount" style="font-size:0.78rem;color:var(--color-text-muted);margin-top:8px"></p>
+
+    </main>
+  </div>
+
+  <!-- Compare bar -->
+  <div class="compare-bar" id="compareBar" role="complementary" aria-label="Equipment comparison">
+    <div style="display:flex;align-items:center;gap:16px">
+      <span style="font-size:0.82rem;font-weight:600;color:var(--color-text-secondary)">Compare:</span>
+      <div class="compare-bar__items" id="compareItems"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-compare-clear" onclick="clearCompare()">Clear</button>
+      <button class="btn-compare" onclick="runCompare()">Compare Selected</button>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    SESMineAuth.requireAuth();
+
+    const EQUIPMENT = [
+      /* ── Haul Trucks ── */
+      { id:'cat-793f',  name:'793F',             maker:'Caterpillar', cat:'haul',    catLabel:'Haul Truck',       specs:[['Payload','227 t'],['Engine','2,610 kW'],['GVW','623 t'],['Tyre size','40.00R57']],              price:'$5.2M – $6.8M' },
+      { id:'kom-930e',  name:'930E-5',            maker:'Komatsu',     cat:'haul',    catLabel:'Haul Truck',       specs:[['Payload','291 t'],['Engine','2,611 kW'],['GVW','796 t'],['Tyre size','53/80R63']],              price:'$6.4M – $8.1M' },
+      { id:'lie-t284',  name:'T 284',             maker:'Liebherr',    cat:'haul',    catLabel:'Haul Truck',       specs:[['Payload','363 t'],['Engine','3,650 kW'],['GVW','810 t'],['Drive','Diesel-electric']],           price:'$8.2M – $10.5M' },
+      { id:'cat-785d',  name:'785D',              maker:'Caterpillar', cat:'haul',    catLabel:'Haul Truck',       specs:[['Payload','136 t'],['Engine','1,193 kW'],['GVW','375 t'],['Tyre size','33.00R51']],              price:'$2.8M – $3.6M' },
+      { id:'kom-860e',  name:'860E-1K',           maker:'Komatsu',     cat:'haul',    catLabel:'Haul Truck',       specs:[['Payload','327 t'],['Engine','2,700 kW'],['GVW','875 t'],['Drive','Diesel-electric']],           price:'$7.1M – $9.2M' },
+
+      /* ── Drill Rigs ── */
+      { id:'epi-pv351', name:'Pit Viper 351',     maker:'Epiroc',      cat:'drill',   catLabel:'Blast Hole Drill', specs:[['Hole dia.','251–381 mm'],['Depth','79.2 m'],['Pulldown','667 kN'],['Drive','Electric/Diesel']], price:'$3.8M – $5.1M' },
+      { id:'san-dxi',   name:'DX800i',            maker:'Sandvik',     cat:'drill',   catLabel:'Blast Hole Drill', specs:[['Hole dia.','152–229 mm'],['Depth','42 m'],['Pulldown','320 kN'],['Drive','Diesel']],             price:'$1.9M – $2.6M' },
+      { id:'epi-dm45',  name:'DM45',              maker:'Epiroc',      cat:'drill',   catLabel:'Rotary Drill',     specs:[['Hole dia.','127–229 mm'],['Depth','54.9 m'],['Pulldown','311 kN'],['Drive','Diesel']],           price:'$1.4M – $1.9M' },
+
+      /* ── Loading Equipment ── */
+      { id:'cat-994k',  name:'994K',              maker:'Caterpillar', cat:'load',    catLabel:'Wheel Loader',     specs:[['Bucket','24.4 m³'],['Engine','1,007 kW'],['Op. weight','199 t'],['Lift capacity','72 t']],      price:'$3.1M – $4.2M' },
+      { id:'kom-wa1200','name:'WA1200-6',         maker:'Komatsu',     cat:'load',    catLabel:'Wheel Loader',     specs:[['Bucket','22.0 m³'],['Engine','1,491 kW'],['Op. weight','213 t'],['Lift capacity','65 t']],      price:'$3.4M – $4.6M' },
+      { id:'lie-r9400',  name:'R 9400',           maker:'Liebherr',    cat:'load',    catLabel:'Mining Shovel',    specs:[['Bucket','22–42 m³'],['Engine','2×1,491 kW'],['Op. weight','676 t'],['Reach','16.6 m']],         price:'$14M – $18M' },
+      { id:'cat-6060',  name:'6060',              maker:'Caterpillar', cat:'load',    catLabel:'Mining Shovel',    specs:[['Bucket','28–65 m³'],['Engine','2×1,566 kW'],['Op. weight','592 t'],['Reach','15.8 m']],         price:'$12M – $16M' },
+
+      /* ── Processing ── */
+      { id:'met-hpgr',  name:'HRC™ 3000',         maker:'Metso',       cat:'process', catLabel:'HPGR',             specs:[['Roll dia.','3,000 mm'],['Roll width','2,000 mm'],['Power','2×3,000 kW'],['Throughput','6,000 t/h']], price:'$8M – $12M' },
+      { id:'fls-atox',  name:'ATOX® 50',          maker:'FLSmidth',    cat:'process', catLabel:'Vertical Mill',    specs:[['Table dia.','5,000 mm'],['Power','3,550 kW'],['Feed size','<75 mm'],['Throughput','500 t/h']],   price:'$6M – $9M' },
+      { id:'met-sag',   name:'Premier™ SAG 40×22','maker':'Metso',     cat:'process', catLabel:'SAG Mill',         specs:[['Diameter','12.2 m'],['Length','6.7 m'],['Power','22,000 kW'],['Throughput','3,500 t/h']],        price:'$18M – $26M' },
+
+      /* ── Underground ── */
+      { id:'san-th663', name:'TH663i',            maker:'Sandvik',     cat:'ug',      catLabel:'UG Haul Truck',    specs:[['Payload','63 t'],['Engine','522 kW'],['Height','3.2 m'],['Drive','Diesel']],                    price:'$1.8M – $2.4M' },
+      { id:'epi-st18',  name:'ST18',              maker:'Epiroc',      cat:'ug',      catLabel:'LHD Loader',       specs:[['Bucket','18 m³'],['Engine','336 kW'],['Op. weight','53 t'],['Tramming','6 km/h']],               price:'$1.6M – $2.1M' },
+      { id:'san-dd422', name:'DD422i',            maker:'Sandvik',     cat:'ug',      catLabel:'Development Drill',specs:[['Hole dia.','43–127 mm'],['Coverage','14.4 m²'],['Depth','5.5 m'],['Drive','Electric']],          price:'$1.4M – $1.9M' },
+
+      /* ── Support ── */
+      { id:'cat-d11',   name:'D11',               maker:'Caterpillar', cat:'support', catLabel:'Dozer',            specs:[['Blade','45.2 m³'],['Engine','634 kW'],['Op. weight','115 t'],['Track gauge','2,540 mm']],                    price:'$1.4M – $1.9M' },
+      { id:'cat-24m',   name:'24M',               maker:'Caterpillar', cat:'support', catLabel:'Motor Grader',     specs:[['Blade','7.3 m'],['Engine','328 kW'],['Op. weight','62 t'],['Circle dia.','4.8 m']],               price:'$680K – $920K' },
+      { id:'kom-wa480', name:'WA480-8',            maker:'Komatsu',     cat:'support', catLabel:'Wheel Loader',     specs:[['Bucket','5.5 m³'],['Engine','206 kW'],['Op. weight','27 t'],['Lift capacity','12 t']],            price:'$420K – $580K' },
+    ];
+
+    let compareList = [];
+
+    const CAT_COLOURS = { haul:'cat-haul', drill:'cat-drill', load:'cat-load', process:'cat-process', ug:'cat-ug', support:'cat-support' };
+
+    function renderCards(items) {
+      const grid = document.getElementById('equipGrid');
+      grid.innerHTML = '';
+      items.forEach((eq, i) => {
+        const card = document.createElement('div');
+        card.className = 'equip-card';
+        card.setAttribute('role','article');
+        card.setAttribute('aria-label', eq.name + ' by ' + eq.maker);
+        card.style.animationDelay = (i * 0.04) + 's';
+        card.innerHTML = `
+          <div class="equip-card__category ${CAT_COLOURS[eq.cat] || ''}">${eq.catLabel}</div>
+          <h3 class="equip-card__name">${eq.name}</h3>
+          <p class="equip-card__maker">${eq.maker}</p>
+          <div class="equip-card__specs">
+            ${eq.specs.map(s => `
+              <div class="spec-row">
+                <span class="spec-row__label">${s[0]}</span>
+                <span class="spec-row__value">${s[1]}</span>
+              </div>`).join('')}
+          </div>
+          <div class="equip-card__footer">
+            <span class="equip-card__price">${eq.price}</span>
+            <button class="equip-card__btn" onclick="addToCompare('${eq.id}','${eq.name} ${eq.maker}',event)">+ Compare</button>
+          </div>
+        `;
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName === 'BUTTON') return;
+          SESMine.showToast('Full spec sheet for ' + eq.name + ' coming soon.', 'info');
+        });
+        grid.appendChild(card);
+      });
+      document.getElementById('resultsCount').textContent = items.length + ' item' + (items.length !== 1 ? 's' : '') + ' found';
+    }
+
+    function filterEquipment() {
+      const query  = document.getElementById('equipSearch').value.toLowerCase();
+      const cat    = document.getElementById('filterCategory').value;
+      const maker  = document.getElementById('filterMaker').value;
+      const result = EQUIPMENT.filter(eq => {
+        const matchQuery = !query || eq.name.toLowerCase().includes(query) || eq.maker.toLowerCase().includes(query) || eq.catLabel.toLowerCase().includes(query);
+        const matchCat   = !cat   || eq.cat === cat;
+        const matchMaker = !maker || eq.maker === maker;
+        return matchQuery && matchCat && matchMaker;
+      });
+      renderCards(result);
+    }
+
+    function addToCompare(id, label, e) {
+      e.stopPropagation();
+      if (compareList.find(c => c.id === id)) {
+        SESMine.showToast(label + ' is already in your comparison.', 'warning', 2000);
+        return;
+      }
+      if (compareList.length >= 3) {
+        SESMine.showToast('Maximum 3 items for comparison. Remove one first.', 'warning');
+        return;
+      }
+      compareList.push({ id, label });
+      renderCompareBar();
+      SESMine.showToast(label + ' added to comparison.', 'success', 1800);
+    }
+
+    function removeFromCompare(id) {
+      compareList = compareList.filter(c => c.id !== id);
+      renderCompareBar();
+    }
+
+    function renderCompareBar() {
+      const bar   = document.getElementById('compareBar');
+      const items = document.getElementById('compareItems');
+      if (compareList.length === 0) { bar.classList.remove('visible'); return; }
+      bar.classList.add('visible');
+      items.innerHTML = compareList.map(c => `
+        <div class="compare-chip">
+          ${c.label}
+          <button onclick="removeFromCompare('${c.id}')" aria-label="Remove ${c.label} from comparison">×</button>
+        </div>
+      `).join('');
+    }
+
+    function clearCompare() {
+      compareList = [];
+      renderCompareBar();
+    }
+
+    function runCompare() {
+      if (compareList.length < 2) {
+        SESMine.showToast('Select at least 2 items to compare.', 'warning');
+        return;
+      }
+      SESMine.showToast('Side-by-side comparison view coming soon.', 'info');
+    }
+
+    /* Initial render */
+    renderCards(EQUIPMENT);
+  </script>
+  <script src="/assets/js/meta-injector.js" defer></script>
+  <script src="/assets/js/seo.js" defer></script>
+</body>
+</html>
+
