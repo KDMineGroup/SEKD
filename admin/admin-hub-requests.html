@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hub Requests — SESMine Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: var(--color-bg-deep);
+      font-family: var(--font-body);
+      color: var(--color-text-primary);
+    }
+
+    /* Reuse sidebar from dashboard — shared component */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .sidebar__logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 16px;
+    }
+    .sidebar__logo img { height: 28px; }
+    .sidebar__logo-text { font-size:1rem; font-weight:700; color:var(--color-text-primary); letter-spacing:-0.02em; }
+    .sidebar__badge { font-size:0.65rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:rgba(239,68,68,0.15); color:#ef4444; padding:2px 7px; border-radius:999px; border:1px solid rgba(239,68,68,0.3); margin-left:auto; }
+    .sidebar__section-label { font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-text-muted); padding:12px 20px 6px; }
+    .sidebar__nav a { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:0.875rem; font-weight:500; color:var(--color-text-secondary); text-decoration:none; transition:background 0.15s,color 0.15s; position:relative; }
+    .sidebar__nav a:hover { background:var(--color-bg-hover); color:var(--color-text-primary); }
+    .sidebar__nav a.active { background:rgba(245,166,35,0.1); color:var(--color-accent); font-weight:600; }
+    .sidebar__nav a.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--color-accent); border-radius:0 2px 2px 0; }
+    .sidebar__nav a svg { flex-shrink:0; width:16px; height:16px; }
+    .nav-badge { margin-left:auto; background:var(--color-accent); color:#fff; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:999px; }
+    .sidebar__footer { margin-top:auto; padding:16px 20px; border-top:1px solid var(--color-border); }
+    .admin-user { display:flex; align-items:center; gap:10px; }
+    .admin-user__avatar { width:34px; height:34px; border-radius:50%; background:var(--color-accent); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .admin-user__info { flex:1; min-width:0; }
+    .admin-user__name { font-size:0.82rem; font-weight:600; color:var(--color-text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .admin-user__role { font-size:0.72rem; color:var(--color-text-muted); }
+    .btn-logout { background:none; border:none; cursor:pointer; color:var(--color-text-muted); padding:4px; display:flex; align-items:center; border-radius:var(--radius-sm); transition:color 0.15s,background 0.15s; }
+    .btn-logout:hover { color:#ef4444; background:rgba(239,68,68,0.1); }
+
+    .main-content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+
+    .topbar { height:64px; background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; padding:0 32px; gap:16px; position:sticky; top:0; z-index:50; }
+    .topbar__title { font-size:1rem; font-weight:600; color:var(--color-text-primary); flex:1; }
+
+    .page-body { padding:32px; flex:1; }
+    .page-header { margin-bottom:28px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .page-header h1 { font-size:1.5rem; font-weight:700; color:var(--color-text-primary); letter-spacing:-0.02em; margin:0 0 4px; }
+    .page-header p { font-size:0.875rem; color:var(--color-text-muted); margin:0; }
+
+    /* ── Filters bar ── */
+    .filters-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font-body);
+    }
+
+    .filter-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .filter-btn.active {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .search-input {
+      margin-left: auto;
+      padding: 8px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      width: 220px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+    }
+
+    .search-input::placeholder { color: var(--color-text-muted); }
+
+    /* ── Requests table ── */
+    .table-wrapper {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      background: var(--color-bg-deep);
+      border-bottom: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--color-border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--color-bg-hover); }
+
+    tbody td {
+      padding: 14px 16px;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      vertical-align: middle;
+    }
+
+    .td-primary {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .hub-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .hub-tag.economics    { background:rgba(245,166,35,0.12);  color:#f5a623; }
+    .hub-tag.engineering  { background:rgba(99,102,241,0.12);  color:#6366f1; }
+    .hub-tag.procurement  { background:rgba(20,184,166,0.12);  color:#14b8a6; }
+    .hub-tag.safety       { background:rgba(239,68,68,0.12);   color:#ef4444; }
+    .hub-tag.sustainability{ background:rgba(46,204,113,0.12); color:#2ecc71; }
+    .hub-tag.innovation   { background:rgba(168,85,247,0.12);  color:#a855f7; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-badge.pending    { background:rgba(245,166,35,0.12); color:#f5a623; }
+    .status-badge.pending::before { background:#f5a623; }
+    .status-badge.approved   { background:rgba(46,204,113,0.12); color:#2ecc71; }
+    .status-badge.approved::before { background:#2ecc71; }
+    .status-badge.rejected   { background:rgba(239,68,68,0.12);  color:#ef4444; }
+    .status-badge.rejected::before { background:#ef4444; }
+    .status-badge.reviewing  { background:rgba(99,102,241,0.12); color:#6366f1; }
+    .status-badge.reviewing::before { background:#6366f1; }
+
+    .action-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-approve, .btn-reject, .btn-view {
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      font-family: var(--font-body);
+      transition: all 0.15s;
+    }
+
+    .btn-approve {
+      background: rgba(46,204,113,0.12);
+      color: #2ecc71;
+      border-color: rgba(46,204,113,0.3);
+    }
+    .btn-approve:hover {
+      background: #2ecc71;
+      color: #fff;
+    }
+
+    .btn-reject {
+      background: rgba(239,68,68,0.12);
+      color: #ef4444;
+      border-color: rgba(239,68,68,0.3);
+    }
+    .btn-reject:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .btn-view {
+      background: var(--color-bg-hover);
+      color: var(--color-text-secondary);
+      border-color: var(--color-border);
+    }
+    .btn-view:hover {
+      color: var(--color-text-primary);
+      border-color: var(--color-text-secondary);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--color-text-muted);
+    }
+
+    .empty-state svg {
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-top: 1px solid var(--color-border);
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+
+    .pagination__pages {
+      display: flex;
+      gap: 4px;
+    }
+
+    .page-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-body);
+      transition: all 0.15s;
+    }
+
+    .page-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .page-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; font-weight: 700; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn 0.2s ease both;
+    }
+
+    .modal {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      padding: 32px;
+      box-shadow: var(--shadow-xl);
+      animation: fadeInUp 0.25s ease both;
+      position: relative;
+    }
+
+    .modal__close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s;
+    }
+
+    .modal__close:hover { color: var(--color-text-primary); }
+
+    .modal h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0 0 20px;
+    }
+
+    .detail-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 0.875rem;
+    }
+
+    .detail-row__label {
+      width: 120px;
+      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+
+    .detail-row__value { color: var(--color-text-primary); }
+
+    .modal__actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .modal__actions .btn-approve,
+    .modal__actions .btn-reject {
+      flex: 1;
+      padding: 10px;
+      font-size: 0.875rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" role="navigation" aria-label="Admin navigation">
+    <div class="sidebar__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine" />
+      <span class="sidebar__logo-text">SESMine</span>
+      <span class="sidebar__badge">Admin</span>
+    </div>
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-dashboard.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Dashboard
+      </a>
+    </nav>
+    <p class="sidebar__section-label">Management</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/user-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        User Management
+        <span class="nav-badge">3</span>
+      </a>
+      <a href="/admin/admin-hub-requests.html" class="active" aria-current="page">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Hub Requests
+        <span class="nav-badge">7</span>
+      </a>
+      <a href="/admin/content-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Content
+      </a>
+    </nav>
+    <p class="sidebar__section-label">System</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-users.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Admin Users
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="admin-user">
+        <div class="admin-user__avatar">SA</div>
+        <div class="admin-user__info">
+          <div class="admin-user__name">Super Admin</div>
+          <div class="admin-user__role">Administrator</div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" aria-label="Sign out">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar" role="banner">
+      <span class="topbar__title">Hub Requests</span>
+    </header>
+
+    <main class="page-body" role="main">
+      <div class="page-header">
+        <div>
+          <h1>Hub Access Requests</h1>
+          <p>Review, approve, or reject incoming hub access requests from platform users.</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar" role="toolbar" aria-label="Filter requests">
+        <button class="filter-btn active" data-filter="all" onclick="filterRequests('all', this)">All <span id="count-all">(7)</span></button>
+        <button class="filter-btn" data-filter="pending" onclick="filterRequests('pending', this)">Pending <span id="count-pending">(4)</span></button>
+        <button class="filter-btn" data-filter="reviewing" onclick="filterRequests('reviewing', this)">Reviewing <span id="count-reviewing">(1)</span></button>
+        <button class="filter-btn" data-filter="approved" onclick="filterRequests('approved', this)">Approved <span id="count-approved">(1)</span></button>
+        <button class="filter-btn" data-filter="rejected" onclick="filterRequests('rejected', this)">Rejected <span id="count-rejected">(1)</span></button>
+        <input
+          type="search"
+          class="search-input"
+          placeholder="Search requests…"
+          aria-label="Search hub requests"
+          id="searchInput"
+          oninput="searchRequests(this.value)"
+        />
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table aria-label="Hub access requests">
+          <thead>
+            <tr>
+              <th scope="col">Requester</th>
+              <th scope="col">Organisation</th>
+              <th scope="col">Hub</th>
+              <th scope="col">Requested</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="requestsTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0
+                 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2
+                 2 0 012 2"/>
+          </svg>
+          <p>No requests match your current filter.</p>
+        </div>
+        <div class="pagination">
+          <span id="paginationInfo">Showing 1–7 of 7 requests</span>
+          <div class="pagination__pages">
+            <button class="page-btn active" aria-label="Page 1" aria-current="page">1</button>
+            <button class="page-btn" aria-label="Page 2">2</button>
+            <button class="page-btn" aria-label="Next page">›</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detailModal" role="dialog"
+    aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <button class="modal__close" onclick="closeModal()" aria-label="Close modal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <h2 id="modalTitle">Request Details</h2>
+      <div id="modalContent"></div>
+      <div class="modal__actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    (function() {
+      if (typeof requireAdminAuth === 'function') requireAdminAuth();
+    })();
+
+    /* ── Mock data (replace with API fetch) ── */
+    const REQUESTS = [
+      { id:1, name:'James Wilson',    email:'j.wilson@riotinto.com',   org:'Rio Tinto',   hub:'economics',     date:'2026-07-11', status:'pending',   reason:'Need commodity pricing tools for Q3 budget planning.' },
+      { id:2, name:'Sarah Chen',      email:'s.chen@bhp.com',          org:'BHP',         hub:'innovation',    date:'2026-07-11', status:'pending',   reason:'Exploring automation R&D tools for Pilbara operations.' },
+      { id:3, name:'Mark Okafor',     email:'m.okafor@newmont.com',    org:'Newmont',     hub:'safety',        date:'2026-07-10', status:'reviewing', reason:'Safety compliance reporting for West Africa sites.' },
+      { id:4, name:'Priya Sharma',    email:'p.sharma@glencore.com',   org:'Glencore',    hub:'sustainability',date:'2026-07-10', status:'pending',   reason:'ESG reporting requirements for EU taxonomy compliance.' },
+      { id:5, name:'Tom Nguyen',      email:'t.nguyen@fortescue.com',  org:'Fortescue',   hub:'procurement',   date:'2026-07-09', status:'approved',  reason:'Vendor database access for FY27 equipment sourcing.' },
+      { id:6, name:'Elena Vasquez',   email:'e.vasquez@vale.com',      org:'Vale',        hub:'engineering',   date:'2026-07-08', status:'rejected',  reason:'Structural data access for Carajás expansion project.' },
+      { id:7, name:'David Park',      email:'d.park@anglogold.com',    org:'AngloGold',   hub:'economics',     date:'2026-07-07', status:'pending',   reason:'Market analysis tools for asset valuation.' },
+    ];
+
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let currentRequestId = null;
+
+    function getFiltered() {
+      return REQUESTS.filter(r => {
+        const matchFilter = currentFilter === 'all' || r.status === currentFilter;
+        const q = currentSearch.toLowerCase();
+        const matchSearch = !q ||
+          r.name.toLowerCase().includes(q) ||
+          r.org.toLowerCase().includes(q) ||
+          r.hub.toLowerCase().includes(q) ||
+          r.email.toLowerCase().includes(q);
+        return matchFilter && matchSearch;
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('requestsTableBody');
+      const empty = document.getElementById('emptyState');
+      const filtered = getFiltered();
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        document.getElementById('paginationInfo').textContent = 'No requests found';
+        return;
+      }
+
+      empty.style.display = 'none';
+      document.getElementById('paginationInfo').textContent =
+        `Showing 1–${filtered.length} of ${filtered.length} requests`;
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr data-id="${r.id}">
+          <td>
+            <div class="td-primary">${escHtml(r.name)}</div>
+            <div style="font-size:0.78rem;color:var(--color-text-muted)">${escHtml(r.email)}</div>
+          </td>
+          <td>${escHtml(r.org)}</td>
+          <td><span class="hub-tag ${r.hub}">${cap(r.hub)}</span></td>
+          <td>${formatDate(r.date)}</td>
+          <td><span class="status-badge ${r.status}">${cap(r.status)}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-view" onclick="openModal(${r.id})" aria-label="View request from ${escHtml(r.name)}">View</button>
+              ${r.status === 'pending' || r.status === 'reviewing' ? `
+                <button class="btn-approve" onclick="updateStatus(${r.id},'approved')" aria-label="Approve request from ${escHtml(r.name)}">Approve</button>
+                <button class="btn-reject"  onclick="updateStatus(${r.id},'rejected')" aria-label="Reject request from ${escHtml(r.name)}">Reject</button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterRequests(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable();
+    }
+
+    function searchRequests(val) {
+      currentSearch = val;
+      renderTable();
+    }
+
+    function updateStatus(id, newStatus) {
+      const req = REQUESTS.find(r => r.id === id);
+      if (!req) return;
+      req.status = newStatus;
+      renderTable();
+      closeModal();
+      /* TODO: PATCH /api/admin/hub-requests/:id { status: newStatus } */
+    }
+
+    function openModal(id) {
+      const r = REQUESTS.find(req => req.id === id);
+      if (!r) return;
+      currentRequestId = id;
+
+      document.getElementById('modalContent').innerHTML = `
+        <div class="detail-row"><span class="detail-row__label">Name</span><span class="detail-row__value">${escHtml(r.name)}</span></div>
+        <div class="detail-row"><span class="detail-row__label">Email</span><span class="detail-row__value">${escHtml(r.email)}</span></div>
+        <div class="detail-row"><span class="detail-row__label">Organisation</span><span class="detail-row__value">${escHtml(r.org)}</span></div>
+        <div class="detail-row"><span class="detail-row__label">Hub</span><span class="detail-row__value"><span class="hub-tag ${r.hub}">${cap(r.hub)}</span></span></div>
+        <div class="detail-row"><span class="detail-row__label">Status</span><span class="detail-row__value"><span class="status-badge ${r.status}">${cap(r.status)}</span></span></div>
+        <div class="detail-row"><span class="detail-row__label">Requested</span><span class="detail-row__value">${formatDate(r.date)}</span></div>
+        <div class="detail-row"><span class="detail-row__label">Reason</span><span class="detail-row__value">${escHtml(r.reason)}</span></div>
+      `;
+
+      const actions = document.getElementById('modalActions');
+      actions.innerHTML = (r.status === 'pending' || r.status === 'reviewing') ? `
+        <button class="btn-approve" style="flex:1;padding:10px;font-size:0.875rem" onclick="updateStatus(${r.id},'approved')">✓ Approve Access</button>
+        <button class="btn-reject"  style="flex:1;padding:10px;font-size:0.875rem" onclick="updateStatus(${r.id},'rejected')">✕ Reject Request</button>
+      ` : `<p style="font-size:0.85rem;color:var(--color-text-muted);margin:0">This request has already been <strong>${r.status}</strong>.</p>`;
+
+      document.getElementById('detailModal').classList.add('open');
+      document.getElementById('modalTitle').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('open');
+    }
+
+    /* Close modal on overlay click */
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    /* Close modal on Escape */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    /* ── Helpers ── */
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function cap(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+    function formatDate(d) {
+      return new Date(d).toLocaleDateString('en-AU',
+        { day:'numeric', month:'short', year:'numeric' });
+    }
+
+    async function handleLogout() {
+      try { await fetch('/api/admin/auth/logout',{method:'POST',credentials:'include'}); }
+      finally { window.location.href = '/admin/admin-login.html'; }
+    }
+
+    renderTable();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content Management — SESMine Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{display:flex;min-height:100vh;background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary)}
+    .sidebar{width:240px;flex-shrink:0;background:var(--color-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+    .sidebar__logo{display:flex;align    -items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--color-border);margin-bottom:16px}
+    .sidebar__logo img{height:28px}
+    .sidebar__logo-text{font-size:1rem;font-weight:700;color:var(--color-text-primary);letter-spacing:-0.02em}
+    .sidebar__badge{font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 7px;border-radius:999px;border:1px solid rgba(239,68,68,0.3);margin-left:auto}
+    .sidebar__section-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-muted);padding:12px 20px 6px}
+    .sidebar__nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;transition:background .15s,color .15s;position:relative}
+    .sidebar__nav a:hover{background:var(--color-bg-hover);color:var(--color-text-primary)}
+    .sidebar__nav a.active{background:rgba(245,166,35,0.1);color:var(--color-accent);font-weight:600}
+    .sidebar__nav a.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent);border-radius:0 2px 2px 0}
+    .sidebar__nav a svg{flex-shrink:0;width:16px;height:16px}
+    .nav-badge{margin-left:auto;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px}
+    .sidebar__footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--color-border)}
+    .admin-user{display:flex;align-items:center;gap:10px}
+    .admin-user__avatar{width:34px;height:34px;border-radius:50%;background:var(--color-accent);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0}
+    .admin-user__info{flex:1;min-width:0}
+    .admin-user__name{font-size:0.82rem;font-weight:600;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .admin-user__role{font-size:0.72rem;color:var(--color-text-muted)}
+    .btn-logout{background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;display:flex;align-items:center;border-radius:var(--radius-sm);transition:color .15s,background .15s}
+    .btn-logout:hover{color:#ef4444;background:rgba(239,68,68,0.1)}
+    .main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{height:64px;background:var(--color-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;padding:0 32px;gap:16px;position:sticky;top:0;z-index:50}
+    .topbar__title{font-size:1rem;font-weight:600;color:var(--color-text-primary);flex:1}
+    .page-body{padding:32px;flex:1}
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover { color: var(--color-text-primary); }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeInUp 0.3s ease both; }
+
+    /* ── Content cards ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .content-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .content-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .content-card__header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .content-card__title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .content-card__body {
+      padding: 16px 18px;
+    }
+
+    .content-card__meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .content-card__excerpt {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .content-card__footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .publish-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+    .publish-badge.published { background:rgba(46,204,113,0.12); color:#2ecc71; border:1px solid rgba(46,204,113,0.25); }
+    .publish-badge.draft     { background:rgba(245,166,35,0.12); color:#f5a623; border:1px solid rgba(245,166,35,0.25); }
+    .publish-badge.archived  { background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25); }
+
+    .btn-sm { padding:5px 10px; border-radius:var(--radius-sm); font-size:0.78rem; font-weight:600; cursor:pointer; border:1px solid var(--color-border); background:var(--color-bg-hover); color:var(--color-text-secondary); font-family:var(--font-body); transition:all .15s; }
+    .btn-sm:hover { color:var(--color-text-primary); border-color:var(--color-text-secondary); }
+    .btn-sm.danger { border-color:rgba(239,68,68,0.3); color:#ef4444; background:rgba(239,68,68,0.08); }
+    .btn-sm.danger:hover { background:#ef4444; color:#fff; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: background .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { background:var(--color-accent-dark); box-shadow:0 4px 12px rgba(245,166,35,0.3); }
+
+    /* ── Editor Modal ── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+    .modal-overlay.open{display:flex;animation:fadeIn 0.2s ease both}
+    .modal{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);width:100%;max-width:680px;padding:32px;box-shadow:var(--shadow-xl);animation:fadeInUp 0.25s ease both;position:relative;max-height:90vh;overflow-y:auto}
+    .modal__close{position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;border-radius:var(--radius-sm);transition:color .15s}
+    .modal__close:hover{color:var(--color-text-primary)}
+    .modal h2{font-size:1.1rem;font-weight:700;color:var(--color-text-primary);margin:0 0 24px}
+
+    .form-group{margin-bottom:18px}
+    .form-group label{display:block;font-size:0.8rem;font-weight:600;color:var(--color-text-secondary);margin-bottom:7px}
+    .form-group input,
+    .form-group select,
+    .form-group textarea{width:100%;padding:10px 13px;background:var(--color-bg-input);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-primary);font-size:0.875rem;font-family:var(--font-body);box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(245,166,35,0.12)}
+    .form-group textarea{resize:vertical;min-height:120px;line-height:1.6}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+    .modal__footer{display:flex;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--color-border)}
+    .btn-cancel{padding:9px 16px;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-bg-hover);color:var(--color-text-secondary);font-size:0.875rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+    .btn-cancel:hover{color:var(--color-text-primary)}
+
+    /* ── Pricing table editor ── */
+    .pricing-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .pricing-panel__header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pricing-panel__title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .pricing-tier-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 120px;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      align-items: center;
+    }
+
+    .pricing-tier-row:last-child { border-bottom: none; }
+
+    .pricing-tier-row label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .pricing-tier-row input {
+      width: 100%;
+      padding: 8px 11px;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      font-family: var(--font-body);
+      box-sizing: border-box;
+      transition: border-color .2s;
+    }
+
+    .pricing-tier-row input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" role="navigation" aria-label="Admin navigation">
+    <div class="sidebar__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine" />
+      <span class="sidebar__logo-text">SESMine</span>
+      <span class="sidebar__badge">Admin</span>
+    </div>
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-dashboard.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Dashboard
+      </a>
+    </nav>
+    <p class="sidebar__section-label">Management</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/user-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        User Management <span class="nav-badge">3</span>
+      </a>
+      <a href="/admin/admin-hub-requests.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Hub Requests <span class="nav-badge">7</span>
+      </a>
+      <a href="/admin/content-management.html" class="active" aria-current="page">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Content
+      </a>
+    </nav>
+    <p class="sidebar__section-label">System</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-users.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Admin Users
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="admin-user">
+        <div class="admin-user__avatar">SA</div>
+        <div class="admin-user__info">
+          <div class="admin-user__name">Super Admin</div>
+          <div class="admin-user__role">Administrator</div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" aria-label="Sign out">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar" role="banner">
+      <span class="topbar__title">Content Management</span>
+      <button class="btn-primary" onclick="openEditor(null)" aria-label="Create new content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        New Article
+      </button>
+    </header>
+
+    <main class="page-body" role="main">
+      <div style="margin-bottom:24px">
+        <h1 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;margin:0 0 4px">Content Management</h1>
+        <p style="font-size:0.875rem;color:var(--color-text-muted);margin:0">Manage news articles, resource documents, and platform pricing.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" role="tablist" aria-label="Content sections">
+        <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="tab-news"      id="btn-news"      onclick="switchTab('news')">News Articles</button>
+        <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-resources" id="btn-resources" onclick="switchTab('resources')">Resources</button>
+        <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-pricing"   id="btn-pricing"   onclick="switchTab('pricing')">Pricing</button>
+      </div>
+
+      <!-- News Tab -->
+      <div id="tab-news" class="tab-panel active" role="tabpanel" aria-labelledby="btn-news">
+        <div class="content-grid" id="newsGrid"></div>
+      </div>
+
+      <!-- Resources Tab -->
+      <div id="tab-resources" class="tab-panel" role="tabpanel" aria-labelledby="btn-resources">
+        <div class="content-grid" id="resourcesGrid"></div>
+      </div>
+
+      <!-- Pricing Tab -->
+      <div id="tab-pricing" class="tab-panel" role="tabpanel" aria-labelledby="btn-pricing">
+        <div class="pricing-panel">
+          <div class="pricing-panel__header">
+            <span class="pricing-panel__title">Pricing Tiers</span>
+            <button class="btn-primary" onclick="savePricing()" style="padding:7px 14px;font-size:0.82rem">Save Changes</button>
+          </div>
+          <div id="pricingEditor"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Content Editor Modal -->
+  <div class="modal-overlay" id="editorModal" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+    <div class="modal">
+      <button class="modal__close" onclick="closeEditor()" aria-label="Close editor">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 id="editorTitle">New Article</h2>
+      <form id="editorForm" novalidate>
+        <input type="hidden" id="editId" value="" />
+        <div class="form-group">
+          <label for="editTitle">Title</label>
+          <input type="text" id="editTitle" placeholder="Article headline…" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editCategory">Category</label>
+            <select id="editCategory">
+              <option value="market">Market Update</option>
+              <option value="technology">Technology</option>
+              <option value="esg">ESG</option>
+              <option value="safety">Safety</option>
+              <option value="regulation">Regulation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editStatus">Status</label>
+            <select id="editStatus">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editExcerpt">Excerpt</label>
+          <textarea id="editExcerpt" placeholder="Short summary shown in listings…" style="min-height:80px"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editBody">Body Content</label>
+          <textarea id="editBody" placeholder="Full article content…" style="min-height:180px"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editAuthor">Author</label>
+          <input type="text" id="editAuthor" placeholder="e.g. SESMine Editorial Team" />
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn-cancel" onclick="closeEditor()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1">Save Article</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    (function(){ if(typeof requireAdminAuth==='function') requireAdminAuth(); })();
+
+    /* ── Data ── */
+    const NEWS = [
+      { id:1, title:'Iron Ore Prices Surge on Chinese Stimulus Package', category:'market',     status:'published', excerpt:'Pilbara Blend spot price reached $108.40/t following Beijing infrastructure announcements.', author:'SESMine Editorial', date:'2026-07-11' },
+      { id:2, title:'SESMine v5.0 AI Predictor Now Live',                category:'technology', status:'published', excerpt:'The new AI Predictor module delivers CAPEX forecasting with ±3.2% variance accuracy.',          author:'SESMine Team',     date:'2026-07-10' },
+      { id:3, title:'EU Taxonomy Compliance: What Mining Companies Need', category:'esg',        status:'published', excerpt:'New EU sustainability reporting rules take effect Q1 2027. Here is what to prepare.',            author:'ESG Desk',         date:'2026-07-08' },
+      { id:4, title:'Underground Safety Protocols Update 2026',           category:'safety',     status:'draft',     excerpt:'Updated ICMM guidelines for underground ventilation and emergency egress systems.',              author:'Safety Desk',      date:'2026-07-06' },
+      { id:5, title:'Critical Minerals Strategy: Government Policy Review',category:'regulation',status:'archived',  excerpt:'Federal government releases updated critical minerals list including lithium and cobalt.',         author:'Policy Desk',      date:'2026-06-28' },
+    ];
+
+    const RESOURCES = [
+      { id:1, title:'SESMine Platform User Guide v5.0', category:'documentation', status:'published', excerpt:'Complete guide to all platform features, hubs, and AI tools.', author:'SESMine Docs', date:'2026-07-01' },
+      { id:2, title:'ESG Reporting Template 2026',      category:'template',      status:'published', excerpt:'Downloadable ESG reporting template aligned with GRI and TCFD standards.', author:'ESG Desk', date:'2026-06-15' },
+      { id:3, title:'CAPEX Modelling Methodology',      category:'methodology',   status:'draft',     excerpt:'Technical white paper on the AI Predictor cost modelling framework.', author:'Product Team', date:'2026-06-10' },
+    ];
+
+    const PRICING_TIERS = [
+      { name:'Free',       monthlyPrice:'0',    annualPrice:'0',    description:'Basic access for individuals exploring the platform.' },
+      { name:'Pro',        monthlyPrice:'149',  annualPrice:'1,490', description:'Full hub access for professional mining practitioners.' },
+      { name:'Enterprise', monthlyPrice:'Custom', annualPrice:'Custom', description:'Unlimited access with dedicated support and custom integrations.' },
+    ];
+
+    let activeTab = 'news';
+
+    /* ── Tab switching ── */
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        const isActive = b.id === `btn-${tab}`;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-selected', String(isActive));
+      });
+      document.querySelectorAll('.tab-panel').forEach(p => {
+        p.classList.toggle('active', p.id === `tab-${tab}`);
+      });
+      if (tab === 'pricing') renderPricing();
+    }
+
+    /* ── Render helpers ── */
+    function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function fmtDate(d){ return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); }
+
+    function renderContentGrid(containerId, items) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = items.map((item, i) => `
+        <div class="content-card" style="animation-delay:${i*0.05}s">
+          <div class="content-card__header">
+            <span class="content-card__title">${escHtml(item.title)}</span>
+            <span class="publish-badge ${item.status}">${item.status.charAt(0).toUpperCase()+item.status.slice(1)}</span>
+          </div>
+          <div class="content-card__body">
+            <div class="content-card__meta">
+              <span>${escHtml(item.author)}</span>
+              <span>·</span>
+              <span>${fmtDate(item.date)}</span>
+              <span>·</span>
+              <span style="text-transform:capitalize">${escHtml(item.category)}</span>
+            </div>
+            <p class="content-card__excerpt">${escHtml(item.excerpt)}</p>
+          </div>
+          <div class="content-card__footer">
+            <button class="btn-sm" onclick="openEditor(${item.id},'${containerId==='newsGrid'?'news':'resources'}')" aria-label="Edit ${escHtml(item.title)}">Edit</button>
+            <button class="btn-sm danger" onclick="deleteContent(${item.id},'${containerId==='newsGrid'?'news':'resources'}')" aria-label="Delete ${escHtml(item.title)}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderPricing() {
+      document.getElementById('pricingEditor').innerHTML = PRICING_TIERS.map((t, i) => `
+        <div class="pricing-tier-row">
+          <div>
+            <label>Tier Name</label>
+            <input type="text" value="${escHtml(t.name)}" data-tier="${i}" data-field="name" oninput="updatePricingField(${i},'name',this.value)" />
+          </div>
+          <div>
+            <label>Monthly Price (USD)</label>
+            <input type="text" value="${escHtml(t.monthlyPrice)}" data-tier="${i}" data-field="monthlyPrice" oninput="updatePricingField(${i},'monthlyPrice',this.value)" />
+          </div>
+          <div>
+            <label>Annual Price (USD)</label>
+            <input type="text" value="${escHtml(t.annualPrice)}" data-tier="${i}" data-field="annualPrice" oninput="updatePricingField(${i},'annualPrice',this.value)" />
+          </div>
+          <div>
+            <label>Actions</label>
+            <button class="btn-sm" onclick="alert('Tier ${escHtml(t.name)} saved')" style="width:100%">Save</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updatePricingField(i, field, val) {
+      PRICING_TIERS[i][field] = val;
+    }
+
+    function savePricing() {
+      /* TODO: PATCH /api/admin/pricing { tiers: PRICING_TIERS } */
+      alert('Pricing saved successfully.');
+    }
+
+    /* ── Editor modal ── */
+    function openEditor(id, type = 'news') {
+      const source = type === 'news' ? NEWS : RESOURCES;
+      const item = id ? source.find(x => x.id === id) : null;
+      document.getElementById('editorTitle').textContent = item ? 'Edit Article' : 'New Article';
+      document.getElementById('editId').value      = item ? item.id : '';
+      document.getElementById('editTitle').value   = item ? item.title   : '';
+      document.getElementById('editExcerpt').value = item ? item.excerpt  : '';
+      document.getElementById('editBody').value    = item ? (item.body || '') : '';
+      document.getElementById('editAuthor').value  = item ? item.author  : '';
+      document.getElementById('editStatus').value  = item ? item.status  : 'draft';
+      document.getElementById('editorModal').classList.add('open');
+    }
+
+    function closeEditor() {
+      document.getElementById('editorModal').classList.remove('open');
+    }
+
+    document.getElementById('editorForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id     = document.getElementById('editId').value;
+      const title  = document.getElementById('editTitle').value.trim();
+      const excerpt= document.getElementById('editExcerpt').value.trim();
+      const body   = document.getElementById('editBody').value.trim();
+      const author = document.getElementById('editAuthor').value.trim();
+      const status = document.getElementById('editStatus').value;
+      const category = document.getElementById('editCategory').value;
+
+      if (!title) return;
+
+      if (id) {
+        const item = NEWS.find(x => x.id === parseInt(id));
+        if (item) Object.assign(item, { title, excerpt, body, author, status, category });
+      } else {
+        NEWS.unshift({ id: Date.now(), title, excerpt, body, author, status, category, date: new Date().toISOString().slice(0,10) });
+      }
+      renderContentGrid('newsGrid', NEWS);
+      closeEditor();
+      /* TODO: POST/PATCH /api/admin/content */
+    });
+
+    function deleteContent(id, type) {
+      if (!confirm('Delete this content? This cannot be undone.')) return;
+      if (type === 'news') {
+        const idx = NEWS.findIndex(x => x.id === id);
+        if (idx > -1) { NEWS.splice(idx, 1); renderContentGrid('newsGrid', NEWS); }
+      } else {
+        const idx = RESOURCES.findIndex(x => x.id === id);
+        if (idx > -1) { RESOURCES.splice(idx, 1); renderContentGrid('resourcesGrid', RESOURCES); }
+      }
+      /* TODO: DELETE /api/admin/content/:id */
+    }
+
+    document.getElementById('editorModal').addEventListener('click', function(e){ if(e.target===this) closeEditor(); });
+    document.addEventListener('keydown', e => { if(e.key==='Escape') closeEditor(); });
+
+    async function handleLogout(){
+      try{ await fetch('/api/admin/auth/logout',{method:'POST',credentials:'include'}); }
+      finally{ window.location.href='/admin/admin-login.html'; }
+    }
+
+    /* ── Init ── */
+    renderContentGrid('newsGrid', NEWS);
+    renderContentGrid('resourcesGrid', RESOURCES);
+  </script>
+</body>
+</html>
+

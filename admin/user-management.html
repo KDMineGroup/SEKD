@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Management — SESMine Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body{display:flex;min-height:100vh;background:var(--color-bg-deep);font-family:var(--font-body);color:var(--color-text-primary)}
+    .sidebar{width:240px;flex-shrink:0;background:var(--color-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+    .sidebar__logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--color-border);margin-bottom:16px}
+    .sidebar__logo img{height:28px}
+    .sidebar__logo-text{font-size:1rem;font-weight:700;color:var(--color-text-primary);letter-spacing:-0.02em}
+    .sidebar__badge{font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 7px;border-radius:999px;border:1px solid rgba(239,68,68,0.3);margin-left:auto}
+    .sidebar__section-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-muted);padding:12px 20px 6px}
+    .sidebar__nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;transition:background .15s,color .15s;position:relative}
+    .sidebar__nav a:hover{background:var(--color-bg-hover);color:var(--color-text-primary)}
+    .sidebar__nav a.active{background:rgba(245,166,35,0.1);color:var(--color-accent);font-weight:600}
+    .sidebar__nav a.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent);border-radius:0 2px 2px 0}
+    .sidebar__nav a svg{flex-shrink:0;width:16px;height:16px}
+    .nav-badge{margin-left:auto;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px}
+    .sidebar__footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--color-border)}
+    .admin-user{display:flex;align-items:center;gap:10px}
+    .admin-user__avatar{width:34px;height:34px;border-radius:50%;background:var(--color-accent);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0}
+    .admin-user__info{flex:1;min-width:0}
+    .admin-user__name{font-size:0.82rem;font-weight:600;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .admin-user__role{font-size:0.72rem;color:var(--color-text-muted)}
+    .btn-logout{background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;display:flex;align-items:center;border-radius:var(--radius-sm);transition:color .15s,background .15s}
+    .btn-logout:hover{color:#ef4444;background:rgba(239,68,68,0.1)}
+    .main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{height:64px;background:var(--color-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;padding:0 32px;gap:16px;position:sticky;top:0;z-index:50}
+    .topbar__title{font-size:1rem;font-weight:600;color:var(--color-text-primary);flex:1}
+    .page-body{padding:32px;flex:1}
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .stat-card__label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .stat-card__value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.03em;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      padding: 9px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      font-family: var(--font-body);
+      width: 260px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-input:focus { outline:none; border-color:var(--color-accent); box-shadow:0 0 0 3px rgba(245,166,35,0.12); }
+    .search-input::placeholder { color:var(--color-text-muted); }
+
+    select.filter-select {
+      padding: 9px 12px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      font-family: var(--font-body);
+      cursor: pointer;
+    }
+    select.filter-select:focus { outline:none; border-color:var(--color-accent); }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: background .2s, box-shadow .2s;
+      margin-left: auto;
+    }
+    .btn-primary:hover { background:var(--color-accent-dark); box-shadow:0 4px 12px rgba(245,166,35,0.3); }
+
+    /* ── Table ── */
+    .table-wrapper {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    table { width:100%; border-collapse:collapse; }
+    thead th { padding:12px 16px; text-align:left; font-size:0.75rem; font-weight:700; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.07em; background:var(--color-bg-deep); border-bottom:1px solid var(--color-border); white-space:nowrap; }
+    tbody tr { border-bottom:1px solid var(--color-border); transition:background .15s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--color-bg-hover); }
+    tbody td { padding:13px 16px; font-size:0.875rem; color:var(--color-text-secondary); vertical-align:middle; }
+
+    .user-cell { display:flex; align-items:center; gap:10px; }
+    .user-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .user-name { font-weight:600; color:var(--color-text-primary); font-size:0.875rem; }
+    .user-email { font-size:0.78rem; color:var(--color-text-muted); }
+
+    .plan-badge {
+      display: inline-flex;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .plan-badge.free       { background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25); }
+    .plan-badge.pro        { background:rgba(245,166,35,0.12);  color:#f5a623; border:1px solid rgba(245,166,35,0.25); }
+    .plan-badge.enterprise { background:rgba(99,102,241,0.12);  color:#6366f1; border:1px solid rgba(99,102,241,0.25); }
+
+    .status-dot { display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; font-weight:500; }
+    .status-dot::before { content:''; width:7px; height:7px; border-radius:50%; }
+    .status-dot.active::before   { background:#2ecc71; }
+    .status-dot.active           { color:#2ecc71; }
+    .status-dot.suspended::before{ background:#ef4444; }
+    .status-dot.suspended        { color:#ef4444; }
+    .status-dot.pending::before  { background:#f5a623; }
+    .status-dot.pending          { color:#f5a623; }
+
+    .hub-pills { display:flex; flex-wrap:wrap; gap:4px; }
+    .hub-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--color-bg-hover);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .action-btns { display:flex; align-items:center; gap:5px; }
+    .btn-sm { padding:5px 10px; border-radius:var(--radius-sm); font-size:0.78rem; font-weight:600; cursor:pointer; border:1px solid var(--color-border); background:var(--color-bg-hover); color:var(--color-text-secondary); font-family:var(--font-body); transition:all .15s; }
+    .btn-sm:hover { color:var(--color-text-primary); border-color:var(--color-text-secondary); }
+    .btn-sm.danger { border-color:rgba(239,68,68,0.3); color:#ef4444; background:rgba(239,68,68,0.08); }
+    .btn-sm.danger:hover { background:#ef4444; color:#fff; }
+    .btn-sm.warn { border-color:rgba(245,166,35,0.3); color:#f5a623; background:rgba(245,166,35,0.08); }
+    .btn-sm.warn:hover { background:#f5a623; color:#fff; }
+
+    .pagination { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--color-border); font-size:0.82rem; color:var(--color-text-muted); }
+    .pagination__pages { display:flex; gap:4px; }
+    .page-btn { width:32px; height:32px; border-radius:var(--radius-sm); border:1px solid var(--color-border); background:var(--color-surface); color:var(--color-text-secondary); font-size:0.82rem; cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:var(--font-body); transition:all .15s; }
+    .page-btn:hover { border-color:var(--color-accent); color:var(--color-accent); }
+    .page-btn.active { background:var(--color-accent); border-color:var(--color-accent); color:#fff; font-weight:700; }
+
+    /* ── User Detail Modal ── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+    .modal-overlay.open{display:flex;animation:fadeIn 0.2s ease both}
+    .modal{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);width:100%;max-width:560px;padding:32px;box-shadow:var(--shadow-xl);animation:fadeInUp 0.25s ease both;position:relative;max-height:90vh;overflow-y:auto}
+    .modal__close{position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;border-radius:var(--radius-sm);transition:color .15s}
+    .modal__close:hover{color:var(--color-text-primary)}
+    .modal h2{font-size:1.1rem;font-weight:700;color:var(--color-text-primary);margin:0 0 20px}
+    .detail-section { margin-bottom:20px; }
+    .detail-section h3 { font-size:0.78rem; font-weight:700; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.08em; margin:0 0 12px; }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .detail-item__label { font-size:0.75rem; color:var(--color-text-muted); margin-bottom:3px; }
+    .detail-item__value { font-size:0.875rem; font-weight:600; color:var(--color-text-primary); }
+    .modal__actions { display:flex; gap:10px; margin-top:24px; padding-top:20px; border-top:1px solid var(--color-border); flex-wrap:wrap; }
+    .btn-cancel{padding:9px 16px;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-bg-hover);color:var(--color-text-secondary);font-size:0.875rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+    .btn-cancel:hover{color:var(--color-text-primary)}
+
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" role="navigation" aria-label="Admin navigation">
+    <div class="sidebar__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine" />
+      <span class="sidebar__logo-text">SESMine</span>
+      <span class="sidebar__badge">Admin</span>
+    </div>
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-dashboard.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Dashboard
+      </a>
+    </nav>
+    <p class="sidebar__section-label">Management</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/user-management.html" class="active" aria-current="page">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        User Management
+        <span class="nav-badge">3</span>
+      </a>
+      <a href="/admin/admin-hub-requests.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Hub Requests
+        <span class="nav-badge">7</span>
+      </a>
+      <a href="/admin/content-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Content
+      </a>
+    </nav>
+    <p class="sidebar__section-label">System</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-users.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Admin Users
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="admin-user">
+        <div class="admin-user__avatar">SA</div>
+        <div class="admin-user__info">
+          <div class="admin-user__name">Super Admin</div>
+          <div class="admin-user__role">Administrator</div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" aria-label="Sign out">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar" role="banner">
+      <span class="topbar__title">User Management</span>
+    </header>
+
+    <main class="page-body" role="main">
+      <div style="margin-bottom:28px">
+        <h1 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;margin:0 0 4px">Platform Users</h1>
+        <p style="font-size:0.875rem;color:var(--color-text-muted);margin:0">Manage all registered users, their plans, hub access, and account status.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card" style="animation-delay:0.05s">
+          <div class="stat-card__label">Total Users</div>
+          <div class="stat-card__value">1,284</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.1s">
+          <div class="stat-card__label">Active</div>
+          <div class="stat-card__value" style="color:#2ecc71">1,201</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.15s">
+          <div class="stat-card__label">Suspended</div>
+          <div class="stat-card__value" style="color:#ef4444">3</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.2s">
+          <div class="stat-card__label">Pending</div>
+          <div class="stat-card__value" style="color:#f5a623">80</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.25s">
+          <div class="stat-card__label">Enterprise</div>
+          <div class="stat-card__value" style="color:#6366f1">312</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <input
+          type="search"
+          class="search-input"
+          placeholder="Search users by name, email, org…"
+          aria-label="Search users"
+          oninput="searchUsers(this.value)"
+        />
+        <select class="filter-select" aria-label="Filter by status" onchange="filterUsers('status', this.value)">
+          <option value="all">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="suspended">Suspended</option>
+          <option value="pending">Pending</option>
+        </select>
+        <select class="filter-select" aria-label="Filter by plan" onchange="filterUsers('plan', this.value)">
+          <option value="all">All Plans</option>
+          <option value="free">Free</option>
+          <option value="pro">Pro</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+        <button class="btn-primary" onclick="exportUsers()" aria-label="Export users to CSV">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export CSV
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table aria-label="Platform users">
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Organisation</th>
+              <th scope="col">Plan</th>
+              <th scope="col">Hub Access</th>
+              <th scope="col">Joined</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+        <div class="pagination">
+          <span id="paginationInfo">Showing 1–10 of 1,284 users</span>
+          <div class="pagination__pages">
+            <button class="page-btn active" aria-current="page">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">…</button>
+            <button class="page-btn">129</button>
+            <button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- User Detail Modal -->
+  <div class="modal-overlay" id="userModal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+    <div class="modal">
+      <button class="modal__close" onclick="closeUserModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 id="userModalTitle">User Details</h2>
+      <div id="userModalContent"></div>
+      <div class="modal__actions" id="userModalActions"></div>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    (function(){ if(typeof requireAdminAuth==='function') requireAdminAuth(); })();
+
+    const AVATAR_COLORS = ['#f5a623','#6366f1','#2ecc71','#14b8a6','#ef4444','#a855f7','#0ea5e9'];
+    const ALL_HUBS = ['Economics','Engineering','Procurement','Safety','Sustainability','Innovation'];
+
+    const USERS = [
+      { id:1,  name:'James Wilson',   email:'j.wilson@riotinto.com',  org:'Rio Tinto',  plan:'enterprise', hubs:['Economics','Safety'],              joined:'2025-03-12', status:'active'    },
+      { id:2,  name:'Sarah Chen',     email:'s.chen@bhp.com',         org:'BHP',        plan:'enterprise', hubs:['Innovation','Engineering'],        joined:'2025-04-01', status:'active'    },
+      { id:3,  name:'Mark Okafor',    email:'m.okafor@newmont.com',   org:'Newmont',    plan:'pro',        hubs:['Safety'],                          joined:'2025-06-15', status:'active'    },
+      { id:4,  name:'Priya Sharma',   email:'p.sharma@glencore.com',  org:'Glencore',   plan:'enterprise', hubs:['Sustainability','Economics'],      joined:'2025-07-22', status:'active'    },
+      { id:5,  name:'Tom Nguyen',     email:'t.nguyen@fortescue.com', org:'Fortescue',  plan:'pro',        hubs:['Procurement','Engineering'],       joined:'2025-09-03', status:'active'    },
+      { id:6,  name:'Elena Vasquez',  email:'e.vasquez@vale.com',     org:'Vale',       plan:'pro',        hubs:['Engineering'],                     joined:'2025-10-18', status:'suspended' },
+      { id:7,  name:'David Park',     email:'d.park@anglogold.com',   org:'AngloGold',  plan:'free',       hubs:[],                                  joined:'2026-01-05', status:'pending'   },
+      { id:8,  name:'Amara Diallo',   email:'a.diallo@barrick.com',   org:'Barrick',    plan:'enterprise', hubs:ALL_HUBS,                            joined:'2025-02-28', status:'active'    },
+      { id:9,  name:'Liam O\'Brien',  email:'l.obrien@kinross.com',   org:'Kinross',    plan:'pro',        hubs:['Economics','Procurement'],         joined:'2026-02-14', status:'active'    },
+      { id:10, name:'Mei Zhang',      email:'m.zhang@zijin.com',      org:'Zijin Mining',plan:'free',      hubs:[],                                  joined:'2026-05-30', status:'pending'   },
+    ];
+
+    let searchVal = '';
+    let filters = { status: 'all', plan: 'all' };
+
+    function getFiltered() {
+      return USERS.filter(u => {
+        const matchStatus = filters.status === 'all' || u.status === filters.status;
+        const matchPlan   = filters.plan   === 'all' || u.plan   === filters.plan;
+        const q = searchVal.toLowerCase();
+        const matchSearch = !q ||
+          u.name.toLowerCase().includes(q) ||
+          u.email.toLowerCase().includes(q) ||
+          u.org.toLowerCase().includes(q);
+        return matchStatus && matchPlan && matchSearch;
+      });
+    }
+
+    function avatarColor(name) {
+      let h = 0;
+      for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+      return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+    }
+    function initials(name) { return name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
+    function fmtDate(d) { return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); }
+
+    function renderUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      const filtered = getFiltered();
+      document.getElementById('paginationInfo').textContent =
+        `Showing 1–${Math.min(10, filtered.length)} of ${filtered.length} users`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--color-text-muted)">No users match your search.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.slice(0,10).map(u => `
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar" style="background:${avatarColor(u.name)}">${initials(u.name)}</div>
+              <div>
+                <div class="user-name">${escHtml(u.name)}</div>
+                <div class="user-email">${escHtml(u.email)}</div>
+              </div>
+            </div>
+          </td>
+          <td>${escHtml(u.org)}</td>
+          <td><span class="plan-badge ${u.plan}">${cap(u.plan)}</span></td>
+          <td>
+            <div class="hub-pills">
+              ${u.hubs.length ? u.hubs.map(h=>`<span class="hub-pill">${escHtml(h)}</span>`).join('') : '<span style="font-size:0.78rem;color:var(--color-text-muted)">None</span>'}
+            </div>
+          </td>
+          <td style="font-size:0.82rem">${fmtDate(u.joined)}</td>
+          <td><span class="status-dot ${u.status}">${cap(u.status)}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-sm" onclick="openUserModal(${u.id})" aria-label="View ${escHtml(u.name)}">View</button>
+              ${u.status === 'active'    ? `<button class="btn-sm warn"   onclick="suspendUser(${u.id})"  aria-label="Suspend ${escHtml(u.name)}">Suspend</button>` : ''}
+              ${u.status === 'suspended' ? `<button class="btn-sm"        onclick="reinstateUser(${u.id})" aria-label="Reinstate ${escHtml(u.name)}">Reinstate</button>` : ''}
+              ${u.status === 'pending'   ? `<button class="btn-sm"        onclick="approveUser(${u.id})"  aria-label="Approve ${escHtml(u.name)}">Approve</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function searchUsers(val) { searchVal = val; renderUsers(); }
+    function filterUsers(key, val) { filters[key] = val; renderUsers(); }
+
+    function openUserModal(id) {
+      const u = USERS.find(x => x.id === id);
+      if (!u) return;
+      document.getElementById('userModalContent').innerHTML = `
+        <div class="detail-section">
+          <h3>Account Info</h3>
+          <div class="detail-grid">
+            <div><div class="detail-item__label">Full Name</div><div class="detail-item__value">${escHtml(u.name)}</div></div>
+            <div><div class="detail-item__label">Email</div><div class="detail-item__value">${escHtml(u.email)}</div></div>
+            <div><div class="detail-item__label">Organisation</div><div class="detail-item__value">${escHtml(u.org)}</div></div>
+            <div><div class="detail-item__label">Plan</div><div class="detail-item__value"><span class="plan-badge ${u.plan}">${cap(u.plan)}</span></div></div>
+            <div><div class="detail-item__label">Joined</div><div class="detail-item__value">${fmtDate(u.joined)}</div></div>
+            <div><div class="detail-item__label">Status</div><div class="detail-item__value"><span class="status-dot ${u.status}">${cap(u.status)}</span></div></div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <h3>Hub Access</h3>
+          <div class="hub-pills" style="gap:6px">
+            ${u.hubs.length ? u.hubs.map(h=>`<span class="hub-pill">${escHtml(h)}</span>`).join('') : '<span style="font-size:0.85rem;color:var(--color-text-muted)">No hub access assigned.</span>'}
+          </div>
+        </div>
+      `;
+      document.getElementById('userModalActions').innerHTML = `
+        <button class="btn-cancel" onclick="closeUserModal()">Close</button>
+        ${u.status==='active' ? `<button class="btn-sm warn" style="padding:9px 16px;font-size:0.875rem" onclick="suspendUser(${u.id});closeUserModal()">Suspend User</button>` : ''}
+        ${u.status==='suspended' ? `<button class="btn-sm" style="padding:9px 16px;font-size:0.875rem" onclick="reinstateUser(${u.id});closeUserModal()">Reinstate User</button>` : ''}
+      `;
+      document.getElementById('userModal').classList.add('open');
+    }
+
+    function closeUserModal() { document.getElementById('userModal').classList.remove('open'); }
+
+    function suspendUser(id) {
+      const u = USERS.find(x=>x.id===id);
+      if(u && confirm(`Suspend ${u.name}? They will lose platform access.`)) {
+        u.status = 'suspended';
+        renderUsers();
+        /* TODO: PATCH /api/admin/users/:id { status:'suspended' } */
+      }
+    }
+
+    function reinstateUser(id) {
+      const u = USERS.find(x=>x.id===id);
+      if(u) { u.status='active'; renderUsers(); }
+    }
+
+    function approveUser(id) {
+      const u = USERS.find(x=>x.id===id);
+      if(u) { u.status='active'; renderUsers(); }
+    }
+
+    function exportUsers() {
+      const filtered = getFiltered();
+      const csv = [
+        ['Name','Email','Organisation','Plan','Status','Joined'],
+        ...filtered.map(u=>[u.name,u.email,u.org,u.plan,u.status,u.joined])
+      ].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `sesmine-users-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    document.getElementById('userModal').addEventListener('click',function(e){if(e.target===this)closeUserModal()});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeUserModal()});
+
+    async function handleLogout(){
+      try{await fetch('/api/admin/auth/logout',{method:'POST',credentials:'include'});}
+      finally{window.location.href='/admin/admin-login.html';}
+    }
+
+    renderUsers();
+  </script>
+</body>
+</html>

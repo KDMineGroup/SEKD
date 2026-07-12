@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Users — SESMine Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    body { display:flex; min-height:100vh; background:var(--color-bg-deep); font-family:var(--font-body); color:var(--color-text-primary); }
+    /* Sidebar — same as hub-requests */
+    .sidebar{width:240px;flex-shrink:0;background:var(--color-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+    .sidebar__logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--color-border);margin-bottom:16px}
+    .sidebar__logo img{height:28px}
+    .sidebar__logo-text{font-size:1rem;font-weight:700;color:var(--color-text-primary);letter-spacing:-0.02em}
+    .sidebar__badge{font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 7px;border-radius:999px;border:1px solid rgba(239,68,68,0.3);margin-left:auto}
+    .sidebar__section-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-muted);padding:12px 20px 6px}
+    .sidebar__nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:0.875rem;font-weight:500;color:var(--color-text-secondary);text-decoration:none;transition:background .15s,color .15s;position:relative}
+    .sidebar__nav a:hover{background:var(--color-bg-hover);color:var(--color-text-primary)}
+    .sidebar__nav a.active{background:rgba(245,166,35,0.1);color:var(--color-accent);font-weight:600}
+    .sidebar__nav a.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent);border-radius:0 2px 2px 0}
+    .sidebar__nav a svg{flex-shrink:0;width:16px;height:16px}
+    .nav-badge{margin-left:auto;background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px}
+    .sidebar__footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--color-border)}
+    .admin-user{display:flex;align-items:center;gap:10px}
+    .admin-user__avatar{width:34px;height:34px;border-radius:50%;background:var(--color-accent);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0}
+    .admin-user__info{flex:1;min-width:0}
+    .admin-user__name{font-size:0.82rem;font-weight:600;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .admin-user__role{font-size:0.72rem;color:var(--color-text-muted)}
+    .btn-logout{background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:4px;display:flex;align-items:center;border-radius:var(--radius-sm);transition:color .15s,background .15s}
+    .btn-logout:hover{color:#ef4444;background:rgba(239,68,68,0.1)}
+    .main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{height:64px;background:var(--color-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;padding:0 32px;gap:16px;position:sticky;top:0;z-index:50}
+    .topbar__title{font-size:1rem;font-weight:600;color:var(--color-text-primary);flex:1}
+    .page-body{padding:32px;flex:1}
+    .page-header{margin-bottom:28px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .page-header h1{font-size:1.5rem;font-weight:700;color:var(--color-text-primary);letter-spacing:-0.02em;margin:0 0 4px}
+    .page-header p{font-size:0.875rem;color:var(--color-text-muted);margin:0}
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      text-decoration: none;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      background: var(--color-accent-dark);
+      box-shadow: 0 4px 12px rgba(245,166,35,0.3);
+    }
+
+    .table-wrapper {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      padding: 8px 14px;
+      background: var(--color-bg-deep);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      width: 240px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+    }
+    .search-input::placeholder { color: var(--color-text-muted); }
+
+    select.filter-select {
+      padding: 8px 12px;
+      background: var(--color-bg-deep);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      cursor: pointer;
+    }
+    select.filter-select:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+
+    .table-toolbar__count {
+      margin-left: auto;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+
+    table { width:100%; border-collapse:collapse; }
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      background: var(--color-bg-deep);
+      border-bottom: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--color-border); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--color-bg-hover); }
+    tbody td { padding: 14px 16px; font-size: 0.875rem; color: var(--color-text-secondary); vertical-align: middle; }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-name { font-weight: 600; color: var(--color-text-primary); font-size: 0.875rem; }
+    .user-email { font-size: 0.78rem; color: var(--color-text-muted); }
+
+    .role-badge {
+      display: inline-flex;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .role-badge.superadmin { background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.25); }
+    .role-badge.admin      { background:rgba(245,166,35,0.12); color:#f5a623; border:1px solid rgba(245,166,35,0.25); }
+    .role-badge.moderator  { background:rgba(99,102,241,0.12); color:#6366f1; border:1px solid rgba(99,102,241,0.25); }
+    .role-badge.viewer     { background:rgba(20,184,166,0.12); color:#14b8a6; border:1px solid rgba(20,184,166,0.25); }
+
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+    .status-dot::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .status-dot.active::before  { background: #2ecc71; }
+    .status-dot.active          { color: #2ecc71; }
+    .status-dot.inactive::before{ background: var(--color-text-muted); }
+    .status-dot.inactive        { color: var(--color-text-muted); }
+
+    .action-btns { display:flex; align-items:center; gap:6px; }
+
+    .btn-sm {
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-hover);
+      color: var(--color-text-secondary);
+      font-family: var(--font-body);
+      transition: all 0.15s;
+    }
+    .btn-sm:hover { color: var(--color-text-primary); border-color: var(--color-text-secondary); }
+    .btn-sm.danger { border-color: rgba(239,68,68,0.3); color: #ef4444; background: rgba(239,68,68,0.08); }
+    .btn-sm.danger:hover { background: #ef4444; color: #fff; }
+
+    /* ── Add Admin Modal ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .modal-overlay.open { display:flex; animation:fadeIn 0.2s ease both; }
+    .modal { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); width:100%; max-width:480px; padding:32px; box-shadow:var(--shadow-xl); animation:fadeInUp 0.25s ease both; position:relative; }
+    .modal__close { position:absolute; top:16px; right:16px; background:none; border:none; cursor:pointer; color:var(--color-text-muted); padding:4px; border-radius:var(--radius-sm); transition:color .15s; }
+    .modal__close:hover { color:var(--color-text-primary); }
+    .modal h2 { font-size:1.1rem; font-weight:700; color:var(--color-text-primary); margin:0 0 24px; }
+    .form-group { margin-bottom:18px; }
+    .form-group label { display:block; font-size:0.8rem; font-weight:600; color:var(--color-text-secondary); margin-bottom:7px; }
+    .form-group input, .form-group select { width:100%; padding:10px 13px; background:var(--color-bg-input); border:1px solid var(--color-border); border-radius:var(--radius-md); color:var(--color-text-primary); font-size:0.875rem; font-family:var(--font-body); box-sizing:border-box; transition:border-color .2s,box-shadow .2s; }
+    .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--color-accent); box-shadow:0 0 0 3px rgba(245,166,35,0.12); }
+    .modal__footer { display:flex; gap:10px; margin-top:24px; padding-top:20px; border-top:1px solid var(--color-border); }
+    .btn-cancel { flex:1; padding:10px; border-radius:var(--radius-md); border:1px solid var(--color-border); background:var(--color-bg-hover); color:var(--color-text-secondary); font-size:0.875rem; font-weight:600; cursor:pointer; font-family:var(--font-body); transition:all .15s; }
+    .btn-cancel:hover { color:var(--color-text-primary); }
+
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" role="navigation" aria-label="Admin navigation">
+    <div class="sidebar__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine" />
+      <span class="sidebar__logo-text">SESMine</span>
+      <span class="sidebar__badge">Admin</span>
+    </div>
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-dashboard.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01                  -2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Dashboard
+      </a>
+    </nav>
+    <p class="sidebar__section-label">Management</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/user-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        User Management
+        <span class="nav-badge">3</span>
+      </a>
+      <a href="/admin/admin-hub-requests.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Hub Requests
+        <span class="nav-badge">7</span>
+      </a>
+      <a href="/admin/content-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Content
+      </a>
+    </nav>
+    <p class="sidebar__section-label">System</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-users.html" class="active" aria-current="page">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Admin Users
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="admin-user">
+        <div class="admin-user__avatar">SA</div>
+        <div class="admin-user__info">
+          <div class="admin-user__name">Super Admin</div>
+          <div class="admin-user__role">Administrator</div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" aria-label="Sign out">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar" role="banner">
+      <span class="topbar__title">Admin Users</span>
+      <button class="btn-primary" onclick="openAddModal()" aria-label="Add new admin user">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Add Admin
+      </button>
+    </header>
+
+    <main class="page-body" role="main">
+      <div class="page-header">
+        <div>
+          <h1>Admin User Management</h1>
+          <p>Manage administrator accounts, roles, and system access permissions.</p>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <div class="table-toolbar">
+          <input
+            type="search"
+            class="search-input"
+            placeholder="Search admins…"
+            aria-label="Search admin users"
+            oninput="searchAdmins(this.value)"
+          />
+          <select class="filter-select" aria-label="Filter by role" onchange="filterByRole(this.value)">
+            <option value="all">All Roles</option>
+            <option value="superadmin">Super Admin</option>
+            <option value="admin">Admin</option>
+            <option value="moderator">Moderator</option>
+            <option value="viewer">Viewer</option>
+          </select>
+          <span class="table-toolbar__count" id="adminCount">4 administrators</span>
+        </div>
+
+        <table aria-label="Admin users list">
+          <thead>
+            <tr>
+              <th scope="col">Administrator</th>
+              <th scope="col">Role</th>
+              <th scope="col">Last Login</th>
+              <th scope="col">Status</th>
+              <th scope="col">2FA</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminsTableBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Admin Modal -->
+  <div class="modal-overlay" id="addAdminModal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+    <div class="modal">
+      <button class="modal__close" onclick="closeAddModal()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 id="addModalTitle">Add Administrator</h2>
+      <form id="addAdminForm" novalidate>
+        <div class="form-group">
+          <label for="newName">Full Name</label>
+          <input type="text" id="newName" placeholder="e.g. Sarah Mitchell" required autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="newEmail">Email Address</label>
+          <input type="email" id="newEmail" placeholder="admin@sesmine.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="newRole">Role</label>
+          <select id="newRole">
+            <option value="admin">Admin</option>
+            <option value="moderator">Moderator</option>
+            <option value="viewer">Viewer</option>
+            <option value="superadmin">Super Admin</option>
+          </select>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1">Send Invite</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    (function(){ if(typeof requireAdminAuth==='function') requireAdminAuth(); })();
+
+    const AVATAR_COLORS = ['#f5a623','#6366f1','#2ecc71','#14b8a6','#ef4444','#a855f7'];
+
+    const ADMINS = [
+      { id:1, name:'Super Admin',    email:'admin@sesmine.com',        role:'superadmin', lastLogin:'2026-07-12 09:15', status:'active',   twoFA:true  },
+      { id:2, name:'Sarah Mitchell', email:'s.mitchell@sesmine.com',   role:'admin',      lastLogin:'2026-07-11 14:32', status:'active',   twoFA:true  },
+      { id:3, name:'Carlos Reyes',   email:'c.reyes@sesmine.com',      role:'moderator',  lastLogin:'2026-07-10 09:05', status:'active',   twoFA:false },
+      { id:4, name:'Yuki Tanaka',    email:'y.tanaka@sesmine.com',     role:'viewer',     lastLogin:'2026-07-08 16:44', status:'inactive', twoFA:false },
+    ];
+
+    let searchVal = '';
+    let roleFilter = 'all';
+
+    function getFiltered() {
+      return ADMINS.filter(a => {
+        const matchRole = roleFilter === 'all' || a.role === roleFilter;
+        const q = searchVal.toLowerCase();
+        const matchSearch = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
+        return matchRole && matchSearch;
+      });
+    }
+
+    function avatarColor(name) {
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+    }
+
+    function initials(name) {
+      return name.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+    }
+
+    function renderAdmins() {
+      const tbody = document.getElementById('adminsTableBody');
+      const filtered = getFiltered();
+      document.getElementById('adminCount').textContent = `${filtered.length} administrator${filtered.length !== 1 ? 's' : ''}`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--color-text-muted)">No administrators match your search.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(a => `
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar" style="background:${avatarColor(a.name)}">${initials(a.name)}</div>
+              <div>
+                <div class="user-name">${escHtml(a.name)}</div>
+                <div class="user-email">${escHtml(a.email)}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="role-badge ${a.role}">${a.role === 'superadmin' ? 'Super Admin' : cap(a.role)}</span></td>
+          <td style="font-size:0.82rem">${escHtml(a.lastLogin)}</td>
+          <td><span class="status-dot ${a.status}">${cap(a.status)}</span></td>
+          <td>
+            <span style="font-size:0.82rem;font-weight:600;color:${a.twoFA ? '#2ecc71' : '#ef4444'}">
+              ${a.twoFA ? '✓ Enabled' : '✗ Disabled'}
+            </span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-sm" onclick="editAdmin(${a.id})" aria-label="Edit ${escHtml(a.name)}">Edit</button>
+              ${a.role !== 'superadmin' ? `<button class="btn-sm danger" onclick="removeAdmin(${a.id})" aria-label="Remove ${escHtml(a.name)}">Remove</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function searchAdmins(val) { searchVal = val; renderAdmins(); }
+    function filterByRole(val) { roleFilter = val; renderAdmins(); }
+
+    function openAddModal()  { document.getElementById('addAdminModal').classList.add('open'); }
+    function closeAddModal() { document.getElementById('addAdminModal').classList.remove('open'); }
+
+    document.getElementById('addAdminModal').addEventListener('click', function(e) {
+      if (e.target === this) closeAddModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddModal(); });
+
+    document.getElementById('addAdminForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name  = document.getElementById('newName').value.trim();
+      const email = document.getElementById('newEmail').value.trim();
+      const role  = document.getElementById('newRole').value;
+      if (!name || !email) return;
+      /* TODO: POST /api/admin/users { name, email, role } */
+      ADMINS.push({ id: Date.now(), name, email, role, lastLogin: 'Never', status: 'inactive', twoFA: false });
+      renderAdmins();
+      closeAddModal();
+      e.target.reset();
+    });
+
+    function editAdmin(id) {
+      /* TODO: open edit modal pre-populated with admin data */
+      alert(`Edit admin ID ${id} — connect to edit modal`);
+    }
+
+    function removeAdmin(id) {
+      if (!confirm('Remove this administrator? This action cannot be undone.')) return;
+      const idx = ADMINS.findIndex(a => a.id === id);
+      if (idx > -1) { ADMINS.splice(idx, 1); renderAdmins(); }
+      /* TODO: DELETE /api/admin/users/:id */
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function cap(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+
+    async function handleLogout() {
+      try { await fetch('/api/admin/auth/logout',{method:'POST',credentials:'include'}); }
+      finally { window.location.href = '/admin/admin-login.html'; }
+    }
+
+    renderAdmins();
+  </script>
+</body>
+</html>
+

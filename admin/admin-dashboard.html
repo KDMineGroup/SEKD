@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — SESMine</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    /* ── Layout shell ── */
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: var(--color-bg-deep);
+      font-family: var(--font-body);
+      color: var(--color-text-primary);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar__logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar__logo img { height: 28px; }
+
+    .sidebar__logo-text {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar__badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      margin-left: auto;
+    }
+
+    .sidebar__section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      padding: 12px 20px 6px;
+    }
+
+    .sidebar__nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: 0;
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+
+    .sidebar__nav a:hover {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+    }
+
+    .sidebar__nav a.active {
+      background: rgba(245, 166, 35, 0.1);
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .sidebar__nav a.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--color-accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .sidebar__nav a svg {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--color-accent);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .sidebar__footer {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .admin-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-user__avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .admin-user__info { flex: 1; min-width: 0; }
+
+    .admin-user__name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .admin-user__role {
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+    }
+
+    .btn-logout {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .btn-logout:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* ── Main content ── */
+    .main-content {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      height: 64px;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar__title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      flex: 1;
+    }
+
+    .topbar__time {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: var(--color-bg-hover);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+
+    .icon-btn:hover {
+      background: var(--color-bg-deep);
+      color: var(--color-text-primary);
+    }
+
+    .icon-btn .dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid var(--color-surface);
+    }
+
+    /* ── Page body ── */
+    .page-body {
+      padding: 32px;
+      flex: 1;
+    }
+
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.02em;
+      margin: 0 0 4px;
+    }
+
+    .page-header p {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    /* ── KPI grid ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: box-shadow 0.2s, transform 0.2s;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .kpi-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .kpi-card__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .kpi-card__label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .kpi-card__value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .kpi-card__delta {
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .kpi-card__delta.up   { color: var(--color-success); }
+    .kpi-card__delta.down { color: #ef4444; }
+
+    /* ── Content grid ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 1100px) {
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .panel__title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .panel__action {
+      font-size: 0.78rem;
+      color: var(--color-accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .panel__action:hover { text-decoration: underline; }
+
+    .panel__body { padding: 20px; }
+
+    /* ── Activity feed ── */
+    .activity-list { list-style: none; margin: 0; padding: 0; }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-item__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .activity-item__content { flex: 1; }
+
+    .activity-item__text {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    .activity-item__text strong {
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    .activity-item__time {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── System health ── */
+    .health-list { list-style: none; margin: 0; padding: 0; }
+
+    .health-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.85rem;
+    }
+
+    .health-item:last-child { border-bottom: none; }
+
+    .health-item__label { color: var(--color-text-secondary); }
+
+    .status-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .status-pill.ok {
+      background: rgba(46, 204, 113, 0.12);
+      color: #2ecc71;
+      border: 1px solid rgba(46, 204, 113, 0.25);
+    }
+
+    .status-pill.warn {
+      background: rgba(245, 166, 35, 0.12);
+      color: var(--color-accent);
+      border: 1px solid rgba(245, 166, 35, 0.25);
+    }
+
+    .status-pill.error {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    /* ── Quick actions ── */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .quick-action-btn {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .quick-action-btn:hover {
+      background: var(--color-bg-hover);
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+    }
+
+    .quick-action-btn__icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .quick-action-btn__label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Admin navigation">
+
+    <div class="sidebar__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine" />
+      <span class="sidebar__logo-text">SESMine</span>
+      <span class="sidebar__badge">Admin</span>
+    </div>
+
+    <p class="sidebar__section-label">Overview</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-dashboard.html" class="active" aria-current="page">
+        <!-- Grid icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2
+               0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0
+               01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0
+               012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0
+               012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+        </svg>
+        Dashboard
+      </a>
+    </nav>
+
+    <p class="sidebar__section-label">Management</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/user-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10
+               0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3
+               0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0
+               0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        User Management
+        <span class="nav-badge" aria-label="3 pending">3</span>
+      </a>
+      <a href="/admin/admin-hub-requests.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0
+               002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2
+               0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        Hub Requests
+        <span class="nav-badge" aria-label="7 pending">7</span>
+      </a>
+      <a href="/admin/content-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0
+               002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828
+               15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        Content
+      </a>
+    </nav>
+
+    <p class="sidebar__section-label">System</p>
+    <nav class="sidebar__nav">
+      <a href="/admin/admin-users.html">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35
+               0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826
+               2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426
+               1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94
+               1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572
+               1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724
+               0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724
+               1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924
+               0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31
+               2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Admin Users
+      </a>
+    </nav>
+
+    <!-- User footer -->
+    <div class="sidebar__footer">
+      <div class="admin-user">
+        <div class="admin-user__avatar" aria-hidden="true" id="avatarInitials">SA</div>
+        <div class="admin-user__info">
+          <div class="admin-user__name" id="adminName">Super Admin</div>
+          <div class="admin-user__role">Administrator</div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()" aria-label="Sign out">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3
+                 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <div class="main-content">
+
+    <!-- Top bar -->
+    <header class="topbar" role="banner">
+      <button class="icon-btn" id="sidebarToggle"
+        aria-label="Toggle sidebar" aria-expanded="false"
+        aria-controls="sidebar" style="display:none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+          aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <span class="topbar__title">Admin Dashboard</span>
+      <span class="topbar__time" id="liveTime" aria-live="off"></span>
+      <div class="topbar__actions">
+        <button class="icon-btn" aria-label="Notifications (3 unread)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118
+                 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0
+                 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0
+                 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3
+                 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="dot" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page body -->
+    <main class="page-body" role="main">
+
+      <div class="page-header">
+        <h1>System Overview</h1>
+        <p>Real-time platform health, user activity, and pending actions.</p>
+      </div>
+
+      <!-- KPI Cards -->
+      <section aria-label="Key performance indicators">
+        <div class="kpi-grid">
+
+          <div class="kpi-card" style="animation-delay:0.05s">
+            <div class="kpi-card__icon"
+              style="background:rgba(245,166,35,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                fill="none" viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10
+                     0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3
+                     3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0
+                     0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <div class="kpi-card__label">Total Users</div>
+            <div class="kpi-card__value" data-count="1284">1,284</div>
+            <div class="kpi-card__delta up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M5 15l7-7 7 7"/>
+              </svg>
+              +42 this month
+            </div>
+          </div>
+
+          <div class="kpi-card" style="animation-delay:0.1s">
+            <div class="kpi-card__icon"
+              style="background:rgba(46,204,113,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="kpi-card__label">Platform Uptime</div>
+            <div class="kpi-card__value">99.9%</div>
+            <div class="kpi-card__delta up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M5 15l7-7 7 7"/>
+              </svg>
+              SLA met
+            </div>
+          </div>
+
+          <div class="kpi-card" style="animation-delay:0.15s">
+            <div class="kpi-card__icon"
+              style="background:rgba(99,102,241,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2
+                     0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2
+                     2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div class="kpi-card__label">Hub Requests</div>
+            <div class="kpi-card__value">7</div>
+            <div class="kpi-card__delta down">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19 9l-7 7-7-7"/>
+              </svg>
+              Awaiting review
+            </div>
+          </div>
+
+          <div class="kpi-card" style="animation-delay:0.2s">
+            <div class="kpi-card__icon"
+              style="background:rgba(239,68,68,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54
+                     0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464
+                     0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <div class="kpi-card__label">Flagged Accounts</div>
+            <div class="kpi-card__value">3</div>
+            <div class="kpi-card__delta down">
+              Needs action
+            </div>
+          </div>
+
+          <div class="kpi-card" style="animation-delay:0.25s">
+            <div class="kpi-card__icon"
+              style="background:rgba(20,184,166,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                fill="none" viewBox="0 0 24 24" stroke="#14b8a6" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <div class="kpi-card__label">Active Sessions</div>
+            <div class="kpi-card__value" id="activeSessions">—</div>
+            <div class="kpi-card__delta up">Live</div>
+          </div>
+
+          <div class="kpi-card" style="animation-delay:0.3s">
+            <div class="kpi-card__icon"
+              style="background:rgba(245,166,35,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                fill="none" viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3
+                     .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402
+                     2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11
+                     0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="kpi-card__label">MRR</div>
+            <div class="kpi-card__value">$48.2k</div>
+            <div class="kpi-card__delta up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M5 15l7-7 7 7"/>
+              </svg>
+              +8.4% MoM
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section aria-label="Quick actions">
+        <h2 style="font-size:0.85rem;font-weight:700;color:var(--color-text-muted);
+          text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px">
+          Quick Actions
+        </h2>
+        <div class="quick-actions">
+          <a href="/admin/user-management.html" class="quick-action-btn"
+            style="animation-delay:0.05s">
+            <div class="quick-action-btn__icon"
+              style="background:rgba(245,166,35,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                fill="none" viewBox="0 0 24 24" stroke="#f5a623" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4
+                     0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+              </svg>
+            </div>
+            <span class="quick-action-btn__label">Add User</span>
+          </a>
+          <a href="/admin/admin-hub-requests.html" class="quick-action-btn"
+            style="animation-delay:0.1s">
+            <div class="quick-action-btn__icon"
+              style="background:rgba(99,102,241,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2
+                     0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2
+                     2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+              </svg>
+            </div>
+            <span class="quick-action-btn__label">Review Requests</span>
+          </a>
+          <a href="/admin/content-management.html" class="quick-action-btn"
+            style="animation-delay:0.15s">
+            <div class="quick-action-btn__icon"
+              style="background:rgba(20,184,166,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                fill="none" viewBox="0 0 24 24" stroke="#14b8a6" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2
+                     0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828
+                     15H9v-2.828l8.586-8.586z"/>
+              </svg>
+            </div>
+            <span class="quick-action-btn__label">Edit Content</span>
+          </a>
+          <a href="/news.html" class="quick-action-btn"
+            style="animation-delay:0.2s">
+            <div class="quick-action-btn__icon"
+              style="background:rgba(46,204,113,0.12)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                fill="none" viewBox="0 0 24 24" stroke="#2ecc71" stroke-width="2"
+                aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2
+                     0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0
+                     002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+              </svg>
+            </div>
+            <span class="quick-action-btn__label">Publish News</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Content grid: Activity + Health -->
+      <div class="content-grid">
+
+        <!-- Activity Feed -->
+        <div class="panel">
+          <div class="panel__header">
+            <span class="panel__title">Recent Activity</span>
+            <a href="#" class="panel__action">View all</a>
+          </div>
+          <div class="panel__body">
+            <ul class="activity-list" id="activityFeed" aria-label="Recent platform activity">
+              <li class="activity-item">
+                <span class="activity-item__dot"
+                  style="background:#2ecc71"></span>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">
+                    <strong>New user registered</strong> — james.wilson@riotinto.com
+                  </p>
+                  <p class="activity-item__time">2 minutes ago</p>
+                </div>
+              </li>
+              <li class="activity-item">
+                <span class="activity-item__dot"
+                  style="background:#6366f1"></span>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">
+                    <strong>Hub request submitted</strong> — Innovation Hub access by BHP team
+                  </p>
+                  <p class="activity-item__time">14 minutes ago</p>
+                </div>
+              </li>
+              <li class="activity-item">
+                <span class="activity-item__dot"
+                  style="background:#f5a623"></span>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">
+                    <strong>Content updated</strong> — Iron Ore pricing data refreshed
+                  </p>
+                  <p class="activity-item__time">1 hour ago</p>
+                </div>
+              </li>
+              <li class="activity-item">
+                <span class="activity-item__dot"
+                  style="background:#ef4444"></span>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">
+                    <strong>Account flagged</strong> — Suspicious login from unknown IP
+                  </p>
+                  <p class="activity-item__time">3 hours ago</p>
+                </div>
+              </li>
+              <li class="activity-item">
+                <span class="activity-item__dot"
+                  style="background:#2ecc71"></span>
+                <div class="activity-item__content">
+                  <p class="activity-item__text">
+                    
+                    <strong>Deployment successful</strong> — SESMine v5.0.1 pushed to production
+                  </p>
+                  <p class="activity-item__time">6 hours ago</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="panel">
+          <div class="panel__header">
+            <span class="panel__title">System Health</span>
+            <span class="status-pill ok">All Systems Go</span>
+          </div>
+          <div class="panel__body">
+            <ul class="health-list" aria-label="System health status">
+              <li class="health-item">
+                <span class="health-item__label">API Gateway</span>
+                <span class="status-pill ok">Operational</span>
+              </li>
+              <li class="health-item">
+                <span class="health-item__label">Database Cluster</span>
+                <span class="status-pill ok">Operational</span>
+              </li>
+              <li class="health-item">
+                <span class="health-item__label">AI Predictor Service</span>
+                <span class="status-pill ok">Operational</span>
+              </li>
+              <li class="health-item">
+                <span class="health-item__label">CDN / Assets</span>
+                <span class="status-pill ok">Operational</span>
+              </li>
+              <li class="health-item">
+                <span class="health-item__label">Email Service</span>
+                <span class="status-pill warn">Degraded</span>
+              </li>
+              <li class="health-item">
+                <span class="health-item__label">Auth Service</span>
+                <span class="status-pill ok">Operational</span>
+              </li>
+              <li class="health-item">
+                <span class="health-item__label">ESG Data Feed</span>
+                <span class="status-pill ok">Operational</span>
+              </li>
+              <li class="health-item">
+                <span class="health-item__label">Backup Jobs</span>
+                <span class="status-pill ok">Last run: 02:00 UTC</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div><!-- /.content-grid -->
+
+    </main><!-- /.page-body -->
+  </div><!-- /.main-content -->
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    /* ── Auth guard ── */
+    (function() {
+      if (typeof requireAdminAuth === 'function') requireAdminAuth();
+    })();
+
+    /* ── Live clock ── */
+    function updateClock() {
+      const el = document.getElementById('liveTime');
+      if (el) {
+        el.textContent = new Date().toLocaleString('en-AU', {
+          weekday: 'short', day: 'numeric', month: 'short',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+      }
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* ── Populate admin name from session ── */
+    async function loadAdminProfile() {
+      try {
+        const res = await fetch('/api/admin/me', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const nameEl = document.getElementById('adminName');
+        const avatarEl = document.getElementById('avatarInitials');
+        if (nameEl && data.name) {
+          nameEl.textContent = data.name;
+          const parts = data.name.split(' ');
+          avatarEl.textContent = parts.map(p => p[0]).join('').slice(0, 2).toUpperCase();
+        }
+      } catch (_) {}
+    }
+    loadAdminProfile();
+
+    /* ── Fetch active sessions ── */
+    async function loadActiveSessions() {
+      try {
+        const res = await fetch('/api/admin/sessions/count', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const el = document.getElementById('activeSessions');
+        if (el && data.count !== undefined) el.textContent = data.count;
+      } catch (_) {
+        document.getElementById('activeSessions').textContent = 'N/A';
+      }
+    }
+    loadActiveSessions();
+    setInterval(loadActiveSessions, 30_000);
+
+    /* ── Logout ── */
+    async function handleLogout() {
+      try {
+        await fetch('/api/admin/auth/logout', {
+          method: 'POST',
+          credentials: 'include'
+        });
+      } finally {
+        window.location.href = '/admin/admin-login.html';
+      }
+    }
+
+    /* ── Mobile sidebar toggle ── */
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const sidebar   = document.getElementById('sidebar');
+    if (window.innerWidth <= 768) {
+      toggleBtn.style.display = 'flex';
+    }
+    toggleBtn.addEventListener('click', () => {
+      const isOpen = sidebar.classList.toggle('open');
+      toggleBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+  </script>
+
+</body>
+</html>

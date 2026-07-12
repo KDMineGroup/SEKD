@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — SESMine</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/animations.css" />
+  <style>
+    /* ── Page-scoped overrides ── */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg-deep);
+      font-family: var(--font-body);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      box-shadow: var(--shadow-xl);
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .login-card__logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .login-card__logo img {
+      height: 32px;
+      width: auto;
+    }
+
+    .login-card__logo span {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .login-card__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      margin-bottom: 24px;
+    }
+
+    .login-card__badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: pulse 2s infinite;
+    }
+
+    .login-card h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .login-card p {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin: 0 0 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.9rem;
+      font-family: var(--font-body);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15);
+    }
+
+    .form-group input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      padding-right: 44px;
+    }
+
+    .input-wrapper button.toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper button.toggle-pw:hover {
+      color: var(--color-text-primary);
+    }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      font-size: 0.8rem;
+    }
+
+    .form-options label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .form-options a {
+      color: var(--color-accent);
+      text-decoration: none;
+    }
+
+    .form-options a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-login:hover {
+      background: var(--color-accent-dark);
+      box-shadow: 0 4px 16px rgba(245, 166, 35, 0.3);
+    }
+
+    .btn-login:active {
+      transform: scale(0.98);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      display: none;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .alert--error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .alert--success {
+      background: rgba(46, 204, 113, 0.1);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      color: #2ecc71;
+    }
+
+    .alert.visible {
+      display: block;
+      animation: fadeInUp 0.25s ease both;
+    }
+
+    .login-footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--color-border);
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+
+    .login-footer a {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+    }
+
+    .login-footer a:hover {
+      color: var(--color-accent);
+    }
+
+    .security-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 16px;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .security-note svg {
+      flex-shrink: 0;
+      color: var(--color-success);
+    }
+
+    /* Loading spinner inside button */
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .btn-login.loading .btn-text { display: none; }
+    .btn-login.loading .spinner  { display: inline-block; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="login-card" role="main">
+
+    <!-- Logo -->
+    <div class="login-card__logo">
+      <img src="/assets/img/logo.svg" alt="SESMine logo" />
+      <span>SESMine</span>
+    </div>
+
+    <!-- Restricted badge -->
+    <div class="login-card__badge" role="status" aria-label="Restricted access area">
+      Restricted Access
+    </div>
+
+    <h1>Admin Portal</h1>
+    <p>Sign in with your administrator credentials to continue.</p>
+
+    <!-- Alert region -->
+    <div
+      id="alert"
+      class="alert"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    ></div>
+
+    <!-- Login form -->
+    <form id="adminLoginForm" novalidate>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="admin@sesmine.com"
+          autocomplete="username"
+          required
+          aria-required="true"
+          aria-describedby="email-error"
+        />
+        <span id="email-error" class="sr-only" role="alert"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+            aria-required="true"
+            aria-describedby="password-error"
+          />
+          <button
+            type="button"
+            class="toggle-pw"
+            aria-label="Toggle password visibility"
+            aria-pressed="false"
+            onclick="togglePassword(this)"
+          >
+            <!-- Eye icon -->
+            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943
+                   9.542 7-1.274 4.057-5.064 7-9.542 7-4.477
+                   0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </button>
+        </div>
+        <span id="password-error" class="sr-only" role="alert"></span>
+      </div>
+
+      <div class="form-options">
+        <label>
+          <input type="checkbox" name="remember" id="remember" />
+          Remember me
+        </label>
+        <a href="/admin/reset-password.html">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-login" id="loginBtn">
+        <span class="btn-text">Sign In to Admin</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <a href="/index.html">← Return to SESMine Platform</a>
+      <div class="security-note">
+        <!-- Lock icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+          aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6
+               a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8
+               0v4h8z"/>
+        </svg>
+        256-bit TLS encryption · Session expires after 8 hours
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/assets/js/meta-injector.js" defer></script>
+  <script>
+    /* ── Utility: show/hide alert ── */
+    function showAlert(message, type = 'error') {
+      const el = document.getElementById('alert');
+      el.textContent = message;
+      el.className = `alert alert--${type} visible`;
+    }
+
+    function hideAlert() {
+      const el = document.getElementById('alert');
+      el.className = 'alert';
+      el.textContent = '';
+    }
+
+    /* ── Toggle password visibility ── */
+    function togglePassword(btn) {
+      const input = document.getElementById('password');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(isHidden));
+      btn.setAttribute('aria-label',
+        isHidden ? 'Hide password' : 'Show password'
+      );
+    }
+
+    /* ── Basic client-side validation ── */
+    function validateForm(email, password) {
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showAlert('Please enter a valid email address.');
+        return false;
+      }
+      if (!password || password.length < 8) {
+        showAlert('Password must be at least 8 characters.');
+        return false;
+      }
+      return true;
+    }
+
+    /* ── Rate limiting (client-side guard) ── */
+    let attempts = 0;
+    const MAX_ATTEMPTS = 5;
+    let lockoutUntil = null;
+
+    /* ── Form submission ── */
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      /* Lockout check */
+      if (lockoutUntil && Date.now() < lockoutUntil) {
+        const secs = Math.ceil((lockoutUntil - Date.now()) / 1000);
+        showAlert(`Too many attempts. Try again in ${secs}s.`);
+        return;
+      }
+
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('remember').checked;
+
+      if (!validateForm(email, password)) return;
+
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      try {
+        const res = await fetch('/api/admin/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',          // httpOnly cookie
+          body: JSON.stringify({ email, password, remember })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          attempts++;
+          if (attempts >= MAX_ATTEMPTS) {
+            lockoutUntil = Date.now() + 30_000; // 30s lockout
+            showAlert('Too many failed attempts. Locked for 30 seconds.');
+          } else {
+            showAlert(data.message || 'Invalid credentials. Please try again.');
+          }
+          return;
+        }
+
+        /* Success — server sets httpOnly session cookie */
+        attempts = 0;
+        showAlert('Login successful. Redirecting…', 'success');
+        setTimeout(() => {
+          window.location.href = '/admin/admin-dashboard.html';
+        }, 800);
+
+      } catch (err) {
+        showAlert('Network error. Please check your connection and try again.');
+        console.error('[AdminLogin]', err);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+      }
+    });
+
+    /* ── Clear alert on input ── */
+    ['email', 'password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', hideAlert);
+    });
+  </script>
+
+</body>
+</html>
